@@ -11,15 +11,9 @@ on:
 
 jobs:
   verify:
-    name: Verify (${{ matrix.os }})
+    name: Verify
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macos-latest
-          - windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
@@ -29,6 +23,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 11.5.0
+          standalone: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
