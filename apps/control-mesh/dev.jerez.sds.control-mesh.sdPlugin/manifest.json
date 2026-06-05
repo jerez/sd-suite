@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+    "Name": "Control Mesh",
+    "Version": "0.1.0.0",
+    "Author": "Jerez",
+    "Actions": [
+        {
+            "Name": "Control Mesh Setup",
+            "UUID": "dev.jerez.sds.control-mesh.setup",
+            "Icon": "imgs/actions/control-mesh-setup/icon",
+            "PropertyInspectorPath": "ui/control-mesh-setup.html",
+            "Tooltip": "Configure local MCP, executor settings, discovery, and trusted peers.",
+            "UserTitleEnabled": false,
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/control-mesh-setup/key-default",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Execute Remote Action",
+            "UUID": "dev.jerez.sds.control-mesh.execute-remote-action",
+            "Icon": "imgs/actions/execute-remote-action/icon",
+            "PropertyInspectorPath": "ui/execute-remote-action.html",
+            "Tooltip": "Execute an action exposed by a trusted Control Mesh peer.",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/execute-remote-action/key-default",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        }
+    ],
+    "Category": "Control Mesh",
+    "CategoryIcon": "imgs/plugin/category-glyph",
+    "CodePath": "bin/plugin.js",
+    "Description": "Stream Deck plugin for Control Mesh.",
+    "Icon": "imgs/plugin/icon",
+    "SDKVersion": 3,
+    "Software": {
+        "MinimumVersion": "7.1"
+    },
+    "OS": [
+        {
+            "Platform": "mac",
+            "MinimumVersion": "12"
+        },
+        {
+            "Platform": "windows",
+            "MinimumVersion": "10"
+        }
+    ],
+    "Nodejs": {
+        "Version": "24",
+        "Debug": "enabled"
+    },
+    "UUID": "dev.jerez.sds.control-mesh"
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" role="img" aria-labelledby="title">
+  <title id="title">Control Mesh Setup icon</title>
+  <path
+    fill="#FFFFFF"
+    d="M8.9 2.5h2.2l.4 1.7c.4.1.9.3 1.3.5l1.5-.9 1.6 1.6-.9 1.5c.2.4.4.8.5 1.3l1.7.4v2.2l-1.7.4c-.1.5-.3.9-.5 1.3l.9 1.5-1.6 1.6-1.5-.9c-.4.2-.9.4-1.3.5l-.4 1.7H8.9l-.4-1.7c-.5-.1-.9-.3-1.3-.5l-1.5.9-1.6-1.6.9-1.5c-.2-.4-.4-.8-.5-1.3l-1.7-.4V8.9l1.7-.4c.1-.5.3-.9.5-1.3l-.9-1.5 1.6-1.6 1.5.9c.4-.2.8-.4 1.3-.5z"
+  />
+  <circle cx="10" cy="10" r="3.3" fill="#0B1220" />
+  <path d="M10 7.9L12.1 10L10 12.1L7.9 10Z" fill="#FFFFFF" />
+</svg>

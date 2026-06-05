@@ -1,0 +1,43 @@
+# System files
+.DS_Store
+
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+.npm/
+
+# Build and cache outputs
+.turbo/
+.worktrees/
+dist/
+!packages/sdpi-components/dist/
+!packages/sdpi-components/dist/sdpi-components.js
+coverage/
+.eslintcache
+*.tsbuildinfo
+
+# Logs and packaged artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.streamDeckPlugin
+
+# Stream Deck generated/runtime artifacts
+*.sdPlugin/ui/*.js
+*.sdPlugin/logs/
+*.sdPlugin/bin/*.map
+logs/
+
+# Local env/config
+.env
+.env.*
+!.env.example
+/.tmp/
+/.codex/
+
+# Agent local settings
+/AGENTS.override.md
+/CLAUDE.local.md
+.claude/settings.local.json

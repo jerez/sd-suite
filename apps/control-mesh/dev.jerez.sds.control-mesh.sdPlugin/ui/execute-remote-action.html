@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<script src="./sdpi-components.js"></script>
+		<script type="module" src="./execute-remote-action.js"></script>
+	</head>
+	<body hidden>
+		<sdpi-item label="Target Peer">
+			<sdpi-select
+				id="target-peer-select"
+				setting="targetNodeId"
+				label-setting="targetNodeLabel"
+				datasource="getTrustedPeers"
+				loading="Loading trusted peers..."
+				placeholder="Choose trusted peer"
+			>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item label="Remote Action">
+			<sdpi-select
+				id="remote-action-select"
+				setting="actionId"
+				label-setting="actionLabel"
+				datasource="getRemoteActions"
+				loading="Loading remote actions..."
+				placeholder="Choose remote action"
+				show-refresh
+			>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item label="Description">
+			<sdpi-textfield id="remote-action-description" disabled></sdpi-textfield>
+		</sdpi-item>
+	</body>
+</html>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" role="img" aria-labelledby="title desc">
+  <title id="title">Execute Remote Action active key</title>
+  <desc id="desc">Control Mesh route dispatching to a peer.</desc>
+  <rect x="4" y="4" width="64" height="64" rx="16" fill="#071016"/>
+  <rect x="7" y="7" width="58" height="58" rx="14" fill="#0B1220" stroke="#1E293B" stroke-width="1.5"/>
+  <rect x="10" y="10" width="52" height="52" rx="12" fill="#101827" opacity="0.4"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M36 20v9" stroke="#64748B" stroke-width="3"/>
+    <path d="M36 43v9" stroke="#64748B" stroke-width="3"/>
+    <path d="M20 36h9" stroke="#64748B" stroke-width="3"/>
+    <path d="M43 36h8" stroke="#38BDF8" stroke-width="4"/>
+    <path d="M50 31.5L56 36l-6 4.5" stroke="#38BDF8" stroke-width="3"/>
+  </g>
+  <path d="M36 28.5L43.5 36L36 43.5L28.5 36Z" fill="#22D3EE"/>
+  <path d="M36 32L40 36L36 40L32 36Z" fill="#0B1220"/>
+  <g fill="#E5EEF8">
+    <circle cx="36" cy="18" r="4"/>
+    <circle cx="36" cy="54" r="4"/>
+    <circle cx="18" cy="36" r="4"/>
+    <circle cx="56" cy="36" r="4"/>
+  </g>
+  <circle cx="56" cy="36" r="2" fill="#38BDF8"/>
+</svg>

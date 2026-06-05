@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Control Mesh plugin icon</title>
+  <desc id="desc">Dark command tile with a central route diamond connected to trusted peer nodes.</desc>
+  <rect width="512" height="512" rx="112" fill="#071016"/>
+  <rect x="34" y="34" width="444" height="444" rx="96" fill="#0B1220" stroke="#1E293B" stroke-width="8"/>
+  <rect x="54" y="54" width="404" height="404" rx="80" fill="#101827" opacity="0.44"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 143V208" stroke="#64748B" stroke-width="16"/>
+    <path d="M256 304V369" stroke="#64748B" stroke-width="16"/>
+    <path d="M143 256H208" stroke="#64748B" stroke-width="16"/>
+    <path d="M304 256H369" stroke="#22D3EE" stroke-width="20"/>
+  </g>
+  <path d="M256 198L314 256L256 314L198 256Z" fill="#22D3EE"/>
+  <path d="M256 222L290 256L256 290L222 256Z" fill="#0B1220"/>
+  <g fill="#E5EEF8">
+    <circle cx="256" cy="120" r="28"/>
+    <circle cx="256" cy="392" r="28"/>
+    <circle cx="120" cy="256" r="28"/>
+    <circle cx="392" cy="256" r="28"/>
+  </g>
+  <circle cx="392" cy="256" r="14" fill="#22D3EE"/>
+</svg>
