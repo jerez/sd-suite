@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" role="img" aria-labelledby="title">
+  <title id="title">Control Mesh category icon</title>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+    <path d="M14 5.8V10"/>
+    <path d="M14 18v4.2"/>
+    <path d="M5.8 14H10"/>
+    <path d="M18 14h4.2"/>
+    <path d="M14 10l4 4-4 4-4-4Z"/>
+  </g>
+  <g fill="#FFFFFF">
+    <circle cx="14" cy="4.5" r="2"/>
+    <circle cx="14" cy="23.5" r="2"/>
+    <circle cx="4.5" cy="14" r="2"/>
+    <circle cx="23.5" cy="14" r="2"/>
+  </g>
+</svg>

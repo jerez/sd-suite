@@ -1,0 +1,38 @@
+{
+    "name": "@workspace/ui",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "imports": {
+        "#components/*": "./src/components/*.tsx",
+        "#hooks/*": "./src/hooks/*.ts",
+        "#lib/*": "./src/lib/*.ts"
+    },
+    "exports": {
+        "./globals.css": "./src/styles/globals.css",
+        "./components/*": "./src/components/*.tsx",
+        "./hooks/*": "./src/hooks/*.ts",
+        "./lib/*": "./src/lib/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint . --max-warnings 0",
+        "test": "vitest run --passWithNoTests",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-react": "^1.17.0",
+        "radix-ui": "^1.4.3",
+        "react": "^19.2.6",
+        "shadcn": "^4.9.0",
+        "tailwind-merge": "^3.6.0",
+        "tailwindcss": "^4.3.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.2.15"
+    }
+}

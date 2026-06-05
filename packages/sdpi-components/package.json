@@ -1,0 +1,12 @@
+{
+    "name": "@workspace/sdpi-components",
+    "private": true,
+    "version": "4.0.1",
+    "type": "module",
+    "exports": {
+        "./sdpi-components.js": "./sdpi-components.js"
+    },
+    "dependencies": {
+        "sdpi-components": "github:GeekyEggo/sdpi-components#v4.0.1"
+    }
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="288" viewBox="0 0 288 288" role="img" aria-labelledby="title desc">
+  <title id="title">Control Mesh Marketplace icon</title>
+  <desc id="desc">Control Mesh route glyph optimized for the Marketplace app icon.</desc>
+  <rect width="288" height="288" rx="62" fill="#071016"/>
+  <rect x="19" y="19" width="250" height="250" rx="54" fill="#0B1220" stroke="#1E293B" stroke-width="5"/>
+  <rect x="31" y="31" width="226" height="226" rx="46" fill="#101827" opacity="0.44"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M144 80V117" stroke="#64748B" stroke-width="9"/>
+    <path d="M144 171V208" stroke="#64748B" stroke-width="9"/>
+    <path d="M80 144H117" stroke="#64748B" stroke-width="9"/>
+    <path d="M171 144H208" stroke="#22D3EE" stroke-width="11"/>
+  </g>
+  <path d="M144 112L176 144L144 176L112 144Z" fill="#22D3EE"/>
+  <path d="M144 126L162 144L144 162L126 144Z" fill="#0B1220"/>
+  <g fill="#E5EEF8">
+    <circle cx="144" cy="68" r="16"/>
+    <circle cx="144" cy="220" r="16"/>
+    <circle cx="68" cy="144" r="16"/>
+    <circle cx="220" cy="144" r="16"/>
+  </g>
+  <circle cx="220" cy="144" r="8" fill="#22D3EE"/>
+</svg>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			.connection-result[data-state="error"] {
+				--input-font-color: #ff7a7a;
+			}
+
+			.connection-result[data-state="success"] {
+				--input-font-color: #8fd18f;
+			}
+		</style>
+		<script src="./sdpi-components.js"></script>
+		<script type="module" src="./control-mesh-setup.js"></script>
+	</head>
+	<body hidden>
+		<sdpi-item label="Configure">
+			<sdpi-radio id="setup-section" columns="2">
+				<option value="node">This Node</option>
+				<option value="mesh">Mesh</option>
+			</sdpi-radio>
+		</sdpi-item>
+
+		<sdpi-item label="Setup help">
+			<sdpi-textarea id="setup-help" rows="5" disabled></sdpi-textarea>
+		</sdpi-item>
+
+		<div data-setup-panel="node">
+			<sdpi-item label="Node name">
+				<sdpi-textfield id="local-node-name" placeholder="Control Mesh"></sdpi-textfield>
+			</sdpi-item>
+
+			<sdpi-item label="Expose actions">
+				<sdpi-checkbox id="executor-enabled" label="Expose local MCP actions to mesh"></sdpi-checkbox>
+			</sdpi-item>
+
+			<sdpi-item data-executor-setting label="Local MCP URL" hidden>
+				<sdpi-textfield id="local-mcp-url" placeholder="http://localhost:9090/mcp"></sdpi-textfield>
+			</sdpi-item>
+
+			<sdpi-item data-executor-setting label="Local MCP check" hidden>
+				<sdpi-button id="test-local-mcp-button">Check now</sdpi-button>
+			</sdpi-item>
+
+			<sdpi-item data-executor-result id="local-mcp-result-item" label="Local MCP status" hidden>
+				<sdpi-textarea id="local-mcp-result" class="connection-result" role="alert" rows="4" disabled></sdpi-textarea>
+			</sdpi-item>
+
+			<sdpi-item data-executor-setting label="Listen Port" hidden>
+				<sdpi-textfield id="listen-port" placeholder="38765"></sdpi-textfield>
+			</sdpi-item>
+
+			<sdpi-item data-executor-setting label="Mesh endpoint" hidden>
+				<sdpi-textfield id="advertised-url" placeholder="http://host.local:38765" disabled></sdpi-textfield>
+			</sdpi-item>
+
+			<sdpi-item data-executor-result id="network-result-item" label="Network status" hidden>
+				<sdpi-textarea id="network-result" class="connection-result" role="alert" rows="3" disabled></sdpi-textarea>
+			</sdpi-item>
+		</div>
+
+		<div data-setup-panel="mesh" hidden>
+			<sdpi-item label="Find peers">
+				<sdpi-button id="discover-peers-button">Discover peers</sdpi-button>
+			</sdpi-item>
+
+			<sdpi-item id="discovery-result-item" label="Discovered peers (not trusted yet)" hidden>
+				<sdpi-textarea id="discovery-result" class="connection-result" role="alert" rows="4" disabled></sdpi-textarea>
+			</sdpi-item>
+
+			<sdpi-item id="known-peer-selector-item" label="Peers">
+				<sdpi-select id="known-peer-selector" placeholder="Select peer">
+					<option value="">Select peer</option>
+				</sdpi-select>
+			</sdpi-item>
+
+			<sdpi-item id="incoming-pairing-item" label="Pair request" hidden>
+				<sdpi-textarea
+					id="incoming-pairing-message"
+					class="connection-result"
+					role="alert"
+					rows="4"
+					disabled
+				></sdpi-textarea>
+				<sdpi-button id="approve-pairing-button">Approve</sdpi-button>
+				<sdpi-button id="reject-pairing-button">Reject</sdpi-button>
+			</sdpi-item>
+
+			<sdpi-item data-peer-detail label="Peer name" hidden>
+				<sdpi-textfield id="known-peer-name" placeholder="peer display name" disabled></sdpi-textfield>
+			</sdpi-item>
+
+			<sdpi-item data-peer-detail label="Peer endpoint" hidden>
+				<sdpi-textfield id="known-peer-endpoint" placeholder="http://peer.local:38765" disabled></sdpi-textfield>
+			</sdpi-item>
+
+			<sdpi-item data-peer-detail id="peer-actions-item" label="Peer actions" hidden>
+				<sdpi-button id="pair-peer-button">Pair</sdpi-button>
+				<sdpi-button id="remove-peer-button">Remove peer</sdpi-button>
+				<sdpi-button id="rotate-secret-button">Rotate secret</sdpi-button>
+				<sdpi-button id="test-peer-button">Test connection</sdpi-button>
+			</sdpi-item>
+
+			<sdpi-item data-peer-detail id="peer-status-item" label="Connection status" hidden>
+				<sdpi-textarea
+					id="peer-connection-state"
+					class="connection-result"
+					role="alert"
+					rows="4"
+					disabled
+				></sdpi-textarea>
+			</sdpi-item>
+
+			<sdpi-item id="validation-item" label="Peer Validation" hidden>
+				<sdpi-textfield id="validation-message" disabled></sdpi-textfield>
+			</sdpi-item>
+		</div>
+	</body>
+</html>

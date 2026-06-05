@@ -1,0 +1,47 @@
+# AGENTS.md
+
+## Working in This Repo
+
+- Read `README.md` and `docs/*.md` before making project-shaping changes.
+- Treat `README.md` and `docs/*.md` as the source of truth for project conventions, stack direction, naming, and layout.
+- Verify Stream Deck-specific decisions against official Elgato documentation before changing project conventions.
+- Do not add app-specific or plugin-specific files unless explicitly requested.
+- Keep this workspace generic: no machine names, desk setup, or local automation details.
+
+## Tooling
+
+- Use the Node.js version declared in `.nvmrc`.
+- Use the pnpm version declared in `package.json`.
+- Use `pnpm` for package management.
+- Use Turbo task scripts from the repository root.
+- Do not duplicate stack, naming, or layout policy here. Update `README.md` or `docs/*.md` instead.
+
+## Shared and Local Notes
+
+- Treat this file as the shared entry point for repository instructions.
+- Keep working-copy notes or personal preferences in local untracked override
+  files instead of committing them here.
+- Keep tool runtime or host-specific configuration in local untracked config
+  files instead of committing it here.
+- Do not commit machine-specific approvals, local paths, personal workflow habits, or host-only tool configuration.
+
+## Local Working Files
+
+- Keep temporary execution artifacts, process notes, plans, handoff notes, and
+  similar working files under `./.tmp/` as untracked assets.
+
+## Scope and Effort
+
+- Prefer the minimal solution that answers what was asked. Do not expand scope unilaterally.
+- Before starting large research tasks, confirm scope with a one-line plan.
+- If blocked or unable to proceed, stop and ask instead of repeatedly retrying or working around the issue.
+- If a task requires more effort than expected or has unexpected dependencies, stop and surface it before proceeding.
+
+## Verification
+
+- Run focused checks for files changed.
+- For broad workspace changes, prefer:
+    - `pnpm format:check`
+    - `pnpm lint`
+    - `pnpm typecheck`
+    - `pnpm test`
