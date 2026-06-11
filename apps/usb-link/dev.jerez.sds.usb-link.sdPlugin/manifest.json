@@ -1,0 +1,88 @@
+{
+    "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+    "Name": "USB Link",
+    "Version": "0.1.0.0",
+    "Author": "Jerez",
+    "Actions": [
+        {
+            "Name": "Share Device",
+            "UUID": "dev.jerez.sds.usb-link.share-device",
+            "Icon": "imgs/actions/share-device/icon",
+            "Tooltip": "Share one local USBNG device by name.",
+            "PropertyInspectorPath": "ui/share-device.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/share-device/key-default",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Unshare Device",
+            "UUID": "dev.jerez.sds.usb-link.unshare-device",
+            "Icon": "imgs/actions/unshare-device/icon",
+            "Tooltip": "Stop sharing one local USBNG device by name.",
+            "PropertyInspectorPath": "ui/unshare-device.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/unshare-device/key-default",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Connect Device",
+            "UUID": "dev.jerez.sds.usb-link.connect-device",
+            "Icon": "imgs/actions/connect-device/icon",
+            "Tooltip": "Connect one remote USBNG device visible from this machine.",
+            "PropertyInspectorPath": "ui/connect-device.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/connect-device/key-default",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        },
+        {
+            "Name": "Disconnect Device",
+            "UUID": "dev.jerez.sds.usb-link.disconnect-device",
+            "Icon": "imgs/actions/disconnect-device/icon",
+            "Tooltip": "Disconnect one remote USBNG device by name.",
+            "PropertyInspectorPath": "ui/disconnect-device.html",
+            "Controllers": ["Keypad"],
+            "States": [
+                {
+                    "Image": "imgs/actions/disconnect-device/key-default",
+                    "TitleAlignment": "middle"
+                }
+            ]
+        }
+    ],
+    "Category": "USB Link",
+    "CategoryIcon": "imgs/plugin/category-icon",
+    "CodePath": "bin/plugin.js",
+    "Description": "Stream Deck plugin for local USB Network Gate device control.",
+    "Icon": "imgs/plugin/marketplace",
+    "SDKVersion": 3,
+    "Software": {
+        "MinimumVersion": "7.1"
+    },
+    "OS": [
+        {
+            "Platform": "mac",
+            "MinimumVersion": "12"
+        },
+        {
+            "Platform": "windows",
+            "MinimumVersion": "10"
+        }
+    ],
+    "Nodejs": {
+        "Version": "24",
+        "Debug": "enabled"
+    },
+    "UUID": "dev.jerez.sds.usb-link"
+}
