@@ -41,4 +41,12 @@ jobs:
       - name: Lint PR title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
+        run: |
+          PR_TITLE_CLEANED="${PR_TITLE}"
+          PR_TITLE_CLEANED="$(printf '%s\n' "$PR_TITLE_CLEANED" | sed -E 's/[[:space:]]*::[[:space:]]*/: /g')"
+          if [[ "$PR_TITLE_CLEANED" == *:* ]]; then
+            TYPE_PART="${PR_TITLE_CLEANED%%:*}"
+            TITLE_SUFFIX="${PR_TITLE_CLEANED#*:}"
+            PR_TITLE_CLEANED="${TYPE_PART,,}:${TITLE_SUFFIX}"
+          fi
+          printf '%s\n' "$PR_TITLE_CLEANED" | pnpm exec commitlint
