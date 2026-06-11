@@ -1,4 +1,4 @@
-PR title should follow Conventional Commits, for example `fix(control-mesh): handle expired MCP session`.
+Set the PR title to Conventional Commits, for example `fix(control-mesh): handle expired MCP session`.
 
 ## Summary
 
