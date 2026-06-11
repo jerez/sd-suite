@@ -1,3 +1,6 @@
+/**
+ * Minimal Stream Deck property-inspector client surface used by USB Link.
+ */
 export type StreamDeckClient = {
 	getSettings(): Promise<unknown>;
 	setSettings(settings: unknown): Promise<void>;
@@ -16,6 +19,9 @@ declare global {
 	}
 }
 
+/**
+ * Returns the Stream Deck property-inspector client when the SDPI runtime is available.
+ */
 export function getStreamDeckClient(): StreamDeckClient | undefined {
 	const sdpiClient = window.SDPIComponents?.streamDeckClient;
 	if (!sdpiClient) {

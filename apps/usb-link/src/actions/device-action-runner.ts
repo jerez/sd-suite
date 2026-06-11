@@ -26,6 +26,9 @@ type ActionLogger = {
 	warn(message: string): void;
 };
 
+/**
+ * Inputs required to execute one Stream Deck USB Link action press.
+ */
 export type RunDeviceActionInput = {
 	action: ActionImageHandle;
 	createFeedbackImageController?: () => FeedbackImageController;
@@ -40,6 +43,10 @@ export type RunDeviceActionInput = {
 	settings: DeviceActionSettings;
 };
 
+/**
+ * Runs a USB Link action end to end, including device execution, logging, and
+ * transient key-image feedback.
+ */
 export async function runDeviceAction(input: RunDeviceActionInput): Promise<void> {
 	const createFeedbackImages = input.createFeedbackImageController ?? createFeedbackImageController;
 	const createPlatformAdapter = input.createPlatformAdapter ?? createUsbngPlatformAdapter;
@@ -109,6 +116,7 @@ function createFeedbackImageController(): FeedbackImageController {
 		restoreTimers.set(
 			action,
 			setTimeout(() => {
+				// Revert to the action's default key image after the success/error dwell window.
 				restoreTimers.delete(action);
 				void action.setImage(undefined);
 			}, RESULT_IMAGE_DWELL_MS),

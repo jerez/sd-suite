@@ -4,14 +4,24 @@ import { parseDeviceActionSettings } from "./device-action-settings";
 import { matchDeviceByName } from "./device-match";
 import { UsbngNotAvailableError, type UsbngPlatformAdapter } from "./platform-adapter";
 
+/**
+ * Inputs required by the shared USBNG action core.
+ */
 export type ExecuteDeviceActionInput = {
 	adapter: UsbngPlatformAdapter;
 	operation: DeviceOperation;
 	settings: DeviceActionSettings;
 };
 
+/**
+ * Result returned by the shared USBNG action core.
+ */
 export type DeviceActionExecutionResult = { ok: true } | { detail?: string; error: string; ok: false };
 
+/**
+ * Validates action settings, resolves the requested device, and dispatches the
+ * operation to the platform-specific adapter.
+ */
 export async function executeDeviceAction(input: ExecuteDeviceActionInput): Promise<DeviceActionExecutionResult> {
 	const parsedSettings = parseDeviceActionSettings(input.settings);
 	if (!parsedSettings.ok) {

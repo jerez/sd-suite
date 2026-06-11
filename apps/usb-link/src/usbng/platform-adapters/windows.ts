@@ -10,8 +10,14 @@ const USB_NETWORK_GATE_FOLDER = ["Electronic Team", "USB Network Gate"];
 const WINDOWS_64_BINARY = "UsbService64.exe";
 const WINDOWS_32_BINARY = "UsbService.exe";
 
+/**
+ * Executes a local command and returns its combined textual output.
+ */
 export type RunCommand = (file: string, args: string[]) => Promise<string>;
 
+/**
+ * Dependency injection points for the Windows adapter.
+ */
 export type CreateWindowsUsbngAdapterOptions = {
 	env?: NodeJS.ProcessEnv;
 	runCommand?: RunCommand;
@@ -25,6 +31,9 @@ type ParsedWindowsRemoteDevice = {
 	state: RemoteUsbngDeviceState;
 };
 
+/**
+ * Creates the Windows USBNG adapter backed by the installed client CLI.
+ */
 export function createWindowsUsbngAdapter(options: CreateWindowsUsbngAdapterOptions = {}): UsbngPlatformAdapter {
 	const runCommand = options.runCommand ?? defaultRunCommand;
 	const usbServicePaths = options.usbServicePaths ?? getDefaultUsbServicePaths(options.env ?? process.env);
@@ -121,6 +130,7 @@ async function discoverKnownRemoteDevices(
 ): Promise<ParsedWindowsRemoteDevice[]> {
 	const devicesByServer = new Map<string, ParsedWindowsRemoteDevice[]>();
 	for (const device of addedDevices) {
+		// Discover once per server even when multiple added devices point at the same host.
 		const serverDevices = devicesByServer.get(device.server) ?? [];
 		serverDevices.push(device);
 		devicesByServer.set(device.server, serverDevices);
@@ -209,6 +219,7 @@ function splitUsbServiceOutput(output: string): string[] {
 }
 
 function throwIfUsbServiceOutputHasError(output: string): void {
+	// The Windows client can return output even when the process exit code is not reliable.
 	const match = output.match(/^\s*Error:\s*(.+)$/mu);
 	if (match?.[1]) {
 		throw new Error(match[1].trim());
@@ -228,6 +239,7 @@ async function defaultRunCommand(file: string, args: string[]): Promise<string> 
 		}
 
 		if (hasCommandOutput(error)) {
+			// Preserve command output so callers can still parse valid listings before checking for `Error:`.
 			return `${error.stdout}${error.stderr}`;
 		}
 

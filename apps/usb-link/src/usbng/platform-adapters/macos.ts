@@ -8,17 +8,35 @@ import { UsbngNotAvailableError, type UsbngPlatformAdapter } from "../platform-a
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * Default path to the USBNG CLI helper installed by the macOS client.
+ */
 export const DEFAULT_EVEUSBC_PATH = "/Library/Frameworks/EveUSB.framework/Support/eveusbc";
 
+/**
+ * Executes a local command and returns its stdout payload.
+ */
 export type RunCommand = (file: string, args: string[]) => Promise<string>;
+/**
+ * Executes an AppleScript snippet on the current machine.
+ */
 export type RunAppleScript = (script: string) => Promise<void>;
 
+/**
+ * Dependency injection points for the macOS adapter.
+ */
 export type CreateMacosUsbngAdapterOptions = {
 	eveusbcPath?: string;
 	runAppleScript?: RunAppleScript;
 	runCommand?: RunCommand;
 };
 
+/**
+ * Creates the macOS USBNG adapter.
+ *
+ * Local and remote control operations use AppleScript because the installed app
+ * exposes the control surface there. Enumeration uses `eveusbc`.
+ */
 export function createMacosUsbngAdapter(options: CreateMacosUsbngAdapterOptions = {}): UsbngPlatformAdapter {
 	const eveusbcPath = options.eveusbcPath ?? DEFAULT_EVEUSBC_PATH;
 	const runCommand = options.runCommand ?? defaultRunCommand;

@@ -2,8 +2,15 @@ type NamedDevice = {
 	name: string;
 };
 
+/**
+ * Result of attempting to resolve a single device from a list by name.
+ */
 export type DeviceMatchResult<TDevice> = { ok: true; value: TDevice } | { error: string; ok: false };
 
+/**
+ * Resolves a device by name, preferring an exact trimmed match before falling
+ * back to a case-insensitive comparison. Ambiguous matches are rejected.
+ */
 export function matchDeviceByName<TDevice extends NamedDevice>(
 	devices: TDevice[],
 	deviceName: string,

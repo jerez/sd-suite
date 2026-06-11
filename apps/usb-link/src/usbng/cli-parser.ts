@@ -2,8 +2,12 @@ import type { LocalUsbngDevice, RemoteUsbngDevice, RemoteUsbngDeviceState } from
 
 const LOCAL_DEVICE_PATTERN = /^local\s+([^,]+),.*product '(.*)', manuf\./;
 const NETWORK_DEVICE_PATTERN = /^(remote|connected|disconnected)\s+(.+)$/;
+// The device name lives in the seventh CSV-like field emitted by `eveusbc ls net`.
 const NETWORK_DEVICE_NAME_INDEX = 6;
 
+/**
+ * Parses local-device rows returned by `eveusbc ls local`.
+ */
 export function parseLocalUsbngDevices(output: string): LocalUsbngDevice[] {
 	return splitUsbngOutput(output).flatMap((line) => {
 		const match = line.match(LOCAL_DEVICE_PATTERN);
@@ -25,6 +29,9 @@ export function parseLocalUsbngDevices(output: string): LocalUsbngDevice[] {
 	});
 }
 
+/**
+ * Parses network-device rows returned by `eveusbc ls net`.
+ */
 export function parseNetworkUsbngDevices(output: string): RemoteUsbngDevice[] {
 	return splitUsbngOutput(output).flatMap((line) => {
 		const match = line.match(NETWORK_DEVICE_PATTERN);
@@ -61,5 +68,6 @@ function splitUsbngOutput(output: string): string[] {
 }
 
 function toRemoteDeviceState(rawState: string): RemoteUsbngDeviceState {
+	// `disconnected` still represents a connectable remote device in the shared action model.
 	return rawState === "connected" ? "connected" : "remote";
 }

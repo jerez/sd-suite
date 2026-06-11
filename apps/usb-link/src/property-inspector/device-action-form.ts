@@ -6,18 +6,30 @@ type ValueElement = HTMLElement & {
 	value?: string;
 };
 
+/**
+ * Validation result for the device-action property-inspector form.
+ */
 export type ValidationResult = { error: string; ok: false } | { ok: true };
 
+/**
+ * Editable form values managed by the shared device-action property inspector.
+ */
 export type DeviceActionFormInput = {
 	deviceName?: string;
 };
 
+/**
+ * Inputs required to wire the shared property-inspector form.
+ */
 export type InitializeDeviceActionPropertyInspectorInput = {
 	client?: StreamDeckClient;
 	document: Pick<Document, "body" | "getElementById">;
 	helperText: string;
 };
 
+/**
+ * Validates the current property-inspector form state.
+ */
 export function validateDeviceActionForm(input: DeviceActionFormInput): ValidationResult {
 	const result = parseDeviceActionSettings(input);
 	if (!result.ok) {
@@ -27,6 +39,9 @@ export function validateDeviceActionForm(input: DeviceActionFormInput): Validati
 	return { ok: true };
 }
 
+/**
+ * Initializes the shared property-inspector UI used by all four USB Link actions.
+ */
 export async function initializeDeviceActionPropertyInspector(
 	input: InitializeDeviceActionPropertyInspectorInput,
 ): Promise<void> {
@@ -69,6 +84,7 @@ async function persistDeviceName(
 	}
 
 	const currentSettings = (await client.getSettings()) as Record<string, unknown>;
+	// Preserve unrelated Stream Deck settings when updating the shared device-name field.
 	await client.setSettings({
 		...currentSettings,
 		...settings,
