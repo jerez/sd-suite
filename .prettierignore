@@ -4,6 +4,7 @@
 .gitignore
 .npmrc
 .nvmrc
+pnpm-lock.yaml
 **/.pnpm-store/
 coverage/
 dist/
