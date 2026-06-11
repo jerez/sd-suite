@@ -76,8 +76,8 @@ describe("USB Link manifest", () => {
 	});
 
 	it("wires plugin and action asset paths", () => {
-		expect(manifest.Icon).toBe("imgs/plugin/marketplace");
-		expect(manifest.CategoryIcon).toBe("imgs/plugin/category-icon");
+		expect(manifest.Icon).toBe("imgs/plugin/icon");
+		expect(manifest.CategoryIcon).toBe("imgs/plugin/category-glyph");
 
 		for (const action of manifest.Actions) {
 			expect(action.Icon.startsWith("imgs/actions/")).toBe(true);
@@ -85,10 +85,34 @@ describe("USB Link manifest", () => {
 		}
 	});
 
-	it("references existing plugin raster assets", () => {
+	it("references existing visual identity assets", () => {
 		expect(existsSync(path.join(pluginPath, `${manifest.Icon}.png`))).toBe(true);
 		expect(existsSync(path.join(pluginPath, `${manifest.Icon}@2x.png`))).toBe(true);
-		expect(existsSync(path.join(pluginPath, `${manifest.CategoryIcon}.png`))).toBe(true);
-		expect(existsSync(path.join(pluginPath, `${manifest.CategoryIcon}@2x.png`))).toBe(true);
+		expect(existsSync(path.join(pluginPath, `${manifest.CategoryIcon}.svg`))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/category-icon.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/category-icon@2x.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/icon.source.svg"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/marketplace.source.svg"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/marketplace.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/marketplace@2x.png"))).toBe(true);
+	});
+
+	it("keeps plugin raster exports transparent", () => {
+		for (const pngPath of [
+			"imgs/plugin/category-icon.png",
+			"imgs/plugin/category-icon@2x.png",
+			"imgs/plugin/icon.png",
+			"imgs/plugin/icon@2x.png",
+			"imgs/plugin/marketplace.png",
+			"imgs/plugin/marketplace@2x.png",
+		]) {
+			expect(readPngColorType(path.join(pluginPath, pngPath))).toBe(6);
+		}
 	});
 });
+
+function readPngColorType(filePath: string): number {
+	const png = readFileSync(filePath);
+
+	return png[25] ?? -1;
+}

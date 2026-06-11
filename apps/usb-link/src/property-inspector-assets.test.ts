@@ -35,6 +35,19 @@ describe("USB Link property inspector assets", () => {
 		expect(existsSync(path.join(pluginPath, "imgs/states/error.svg"))).toBe(true);
 	});
 
+	it("ships repo-owned plugin visual identity assets only", () => {
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/category-glyph.svg"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/category-icon.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/category-icon@2x.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/icon.source.svg"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/icon.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/icon@2x.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/marketplace.source.svg"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/marketplace.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/plugin/marketplace@2x.png"))).toBe(true);
+		expect(existsSync(path.join(pluginPath, "imgs/actions/counter"))).toBe(false);
+	});
+
 	it("documents the local-only boundary and adapter strategy", () => {
 		const readme = readFileSync(readmePath, "utf8");
 		const userGuide = readFileSync(userGuidePath, "utf8");

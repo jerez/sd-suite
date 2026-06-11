@@ -62,10 +62,10 @@
         }
     ],
     "Category": "USB Link",
-    "CategoryIcon": "imgs/plugin/category-icon",
+    "CategoryIcon": "imgs/plugin/category-glyph",
     "CodePath": "bin/plugin.js",
     "Description": "Stream Deck plugin for local USB Network Gate device control.",
-    "Icon": "imgs/plugin/marketplace",
+    "Icon": "imgs/plugin/icon",
     "SDKVersion": 3,
     "Software": {
         "MinimumVersion": "7.1"
