@@ -2,11 +2,8 @@
 
 ## Before You Start
 
-Control Mesh is a Stream Deck plugin for trusted peer-to-peer action execution
-across nearby machines.
-
-It builds on earlier private iterations and targets the current Elgato Stream
-Deck MCP ecosystem.
+Control Mesh lets a Stream Deck button on one machine run an Elgato MCP action
+on another trusted machine on the same local network.
 
 Before configuring it, you need:
 

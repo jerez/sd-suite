@@ -49,8 +49,5 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Build Control Mesh
-        run: pnpm --filter control-mesh build
-
-      - name: Validate Control Mesh
-        run: pnpm --filter control-mesh validate
+      - name: Build and validate plugins
+        run: pnpm plugin:validate
