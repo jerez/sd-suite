@@ -3,6 +3,9 @@ import type { LocalUsbngDevice, RemoteUsbngDevice, RemoteUsbngDeviceState } from
 const LOCAL_DEVICE_PATTERN = /^local\s+([^,]+),.*product '(.*)', manuf\./;
 const NETWORK_DEVICE_PATTERN = /^(remote|connected|disconnected)\s+(.+)$/;
 // The device name lives in the seventh CSV-like field emitted by `eveusbc ls net`.
+// Limitation: the CLI emits these fields comma-separated without quoting, so a
+// device name that itself contains a comma cannot be recovered unambiguously and
+// will be truncated at the first comma. USB device names rarely contain commas.
 const NETWORK_DEVICE_NAME_INDEX = 6;
 
 /**

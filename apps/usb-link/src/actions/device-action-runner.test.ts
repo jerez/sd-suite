@@ -102,4 +102,35 @@ describe("runDeviceAction", () => {
 
 		expect(action.setImage).toHaveBeenNthCalledWith(3, undefined);
 	});
+
+	it("shows error feedback and restores the default image when execution throws", async () => {
+		const action = createActionHandle();
+		const createPlatformAdapter = vi.fn(() => createAdapterStub());
+		const executeAction = vi.fn().mockRejectedValue(new Error("Underlying CLI crashed."));
+		const logger = {
+			warn: vi.fn(),
+		};
+
+		await runDeviceAction({
+			action,
+			createPlatformAdapter,
+			executeAction,
+			logger,
+			operation: "connect",
+			settings: {
+				deviceName: "Stream Deck Plus",
+			},
+		});
+
+		expect(action.showAlert).toHaveBeenCalledOnce();
+		expect(action.showOk).not.toHaveBeenCalled();
+		expect(action.setImage).toHaveBeenNthCalledWith(1, "imgs/states/active.svg");
+		expect(action.setImage).toHaveBeenNthCalledWith(2, "imgs/states/error.svg");
+		expect(logger.warn).toHaveBeenCalledWith("USB Link connect failed: Underlying CLI crashed.");
+
+		vi.advanceTimersByTime(1_200);
+		await vi.runAllTimersAsync();
+
+		expect(action.setImage).toHaveBeenNthCalledWith(3, undefined);
+	});
 });

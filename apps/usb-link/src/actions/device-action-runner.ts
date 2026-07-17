@@ -118,7 +118,8 @@ function createFeedbackImageController(): FeedbackImageController {
 			setTimeout(() => {
 				// Revert to the action's default key image after the success/error dwell window.
 				restoreTimers.delete(action);
-				void action.setImage(undefined);
+				// Swallow rejections: the action context may be gone by the time the dwell timer fires.
+				void action.setImage(undefined).catch(() => undefined);
 			}, RESULT_IMAGE_DWELL_MS),
 		);
 	}
