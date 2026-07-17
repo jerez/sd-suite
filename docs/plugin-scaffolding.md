@@ -21,7 +21,8 @@ pnpm plugin:pack
 - `format` applies the workspace Prettier config after generating or editing
   files.
 - `lint:fix` applies ESLint fixes after generating or editing files.
-- `plugin:validate` runs package-level Stream Deck validation through Turbo.
+- `plugin:validate` builds and validates every plugin package under `apps/`
+  through Turbo.
 - `plugin:pack` runs package-level Stream Deck packaging through Turbo.
 
 ## Generator Behavior
@@ -172,10 +173,12 @@ outputs for cache correctness.
 - Plugin-specific design notes and implementation plans can live under
   `apps/<plugin-name>/docs/` when that documentation is intentionally created
   for the plugin.
+- `docs/projects.md` is the workspace index that routes readers to the
+  plugin-owned documentation.
 
 ## Scope
 
 Scaffolding creates the plugin project shape only. It keeps Elgato's baseline
 template behavior and does not add product implementation, public distribution
-setup, machine-specific setup, device-specific workflows, or private Stream Deck
+setup, machine-specific setup, device-specific workflows, or undocumented Stream Deck
 internals.

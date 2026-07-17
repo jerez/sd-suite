@@ -1,10 +1,22 @@
 # Control Mesh
 
-Control Mesh is a Stream Deck plugin for trusted local-network control between
-nearby machines through the official Elgato MCP server.
+Control Mesh lets one Stream Deck trigger Elgato MCP executable actions on
+another trusted machine on the same local network.
 
-It builds on earlier private iterations and targets the current Elgato Stream
-Deck MCP ecosystem.
+## When to Use Control Mesh
+
+- You want one machine to host the Stream Deck hardware and another machine to
+  execute the target action.
+- The remote machine already exposes the target workflow through Elgato MCP.
+- Both machines are on the same trusted local network.
+
+## When Not to Use Control Mesh
+
+- You need same-machine service control. Use a local-only plugin such as
+  [USB Link](../usb-link/README.md) instead.
+- You need internet-facing or untrusted-network deployment hardening.
+- The remote machine does not expose the target workflow as an Elgato MCP
+  executable action.
 
 ## Documentation
 

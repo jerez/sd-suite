@@ -4,7 +4,11 @@
 
 USB Link is local-only. Every action runs on the same machine as Stream Deck and only controls the local USB Network Gate client or app on that machine.
 
-No Control Mesh delegation. No EPPC. No remote credential storage. No hostname or port fields in button settings.
+Out of scope:
+
+- Control Mesh delegation
+- remote credential storage
+- hostname or port fields in button settings
 
 ## Shared Core
 

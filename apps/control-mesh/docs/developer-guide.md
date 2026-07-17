@@ -2,12 +2,8 @@
 
 ## Overview
 
-Control Mesh is a Stream Deck plugin that wraps the official Elgato MCP action
-surface with peer discovery, trust, authentication, and Stream Deck-native
-configuration UI.
-
-It builds on earlier private iterations and targets the current Elgato Stream
-Deck MCP ecosystem.
+Control Mesh wraps the Elgato MCP executable-action surface with peer
+discovery, trust, authentication, and Stream Deck-native configuration UI.
 
 The plugin stays focused on a small set of responsibilities:
 

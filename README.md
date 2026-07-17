@@ -1,31 +1,24 @@
 # sd-suite
 
-Open-source Stream Deck plugins and shared tooling.
+`sd-suite` is a monorepo for Stream Deck plugins and shared tooling.
 
-## Included Projects
+## Start Here
 
-### Control Mesh
+- [Project documentation index](./docs/projects.md)
+- [Naming](./docs/naming.md)
+- [Plugin scaffolding](./docs/plugin-scaffolding.md)
+- [Visual identity](./docs/visual-identity.md)
 
-Control Mesh is a Stream Deck plugin for trusted local-network control through
-the official Elgato MCP server. It is a fresh implementation informed by
-earlier private iterations and updated for the current Stream Deck MCP
-ecosystem.
-
-## Project Background
-
-`sd-suite` is a public consolidation of earlier personal Stream Deck plugin
-work developed in private over time.
-
-## AI Tooling
-
-AI tooling is actively used in this project and is intended to remain part of
-the development and release workflow.
+Plugin-specific documentation lives with each plugin package. Start with the
+package README, then use the package guides under `apps/<plugin>/docs/`.
 
 ## Repository Layout
 
 ```text
 apps/
   <plugin>/
+    README.md
+    docs/
     dev.jerez.sds.<plugin>.sdPlugin/
     src/
     package.json
@@ -34,13 +27,6 @@ packages/
 docs/
 tools/
 ```
-
-Plugin-specific documentation lives with each plugin. Shared naming,
-scaffolding, and visual identity conventions live in:
-
-- [`docs/naming.md`](docs/naming.md)
-- [`docs/plugin-scaffolding.md`](docs/plugin-scaffolding.md)
-- [`docs/visual-identity.md`](docs/visual-identity.md)
 
 ## Tooling
 
@@ -69,10 +55,10 @@ pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm plugin:validate
 ```
 
-Plugin packages can add their own `validate` and `pack` steps on top of the
-root baseline.
+`pnpm plugin:validate` builds and validates every plugin package under `apps/`.
 
 ## Pull Requests
 

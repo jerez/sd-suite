@@ -1,26 +1,27 @@
 # USB Link
 
-USB Link is a private Stream Deck plugin for local-only USB Network Gate control.
+USB Link lets Stream Deck control the local USB Network Gate installation on
+the same machine.
 
-Scope:
+## When to Use USB Link
 
-- same machine as Stream Deck
-- four explicit actions: share, unshare, connect, disconnect
-- device name is the only per-button setting
+- You want local-only USB Network Gate control on the same machine as Stream
+  Deck.
+- You need one of four explicit actions: share, unshare, connect, or
+  disconnect.
+- Device name is enough to identify the target device for each key.
 
-Out of scope:
+## When Not to Use USB Link
 
-- remote delegation
-- Control Mesh routing
-- host or port configuration in button settings
-- secret storage in the plugin
+- You need remote delegation across machines.
+- You need host, port, or credential fields in Stream Deck settings.
+- You need USB Link to guess between duplicate visible device names.
 
-## Package Layout
+## Documentation
 
-- runtime and tests: `src/`
-- Stream Deck bundle: `dev.jerez.sds.usb-link.sdPlugin/`
-- user docs: `docs/user-guide.md`
-- developer docs: `docs/developer-guide.md`
+- [User Guide](./docs/user-guide.md)
+- [Developer Guide](./docs/developer-guide.md)
+- [Visual Identity](./docs/visual-identity.md)
 
 ## Commands
 
@@ -31,14 +32,3 @@ pnpm validate
 pnpm pack
 pnpm test
 ```
-
-## Platform Strategy
-
-- macOS: CLI enumeration plus AppleScript execution
-- Windows: installed client CLI enumeration and execution
-
-## Notes
-
-- Matching is strict by device name.
-- Ambiguous duplicate names fail instead of guessing.
-- Windows remote connect and disconnect operate on remote devices already known to the local client.
