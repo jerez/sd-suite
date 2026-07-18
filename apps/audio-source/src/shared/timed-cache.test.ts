@@ -81,4 +81,3 @@ describe("TimedCache", () => {
     expect(loader).toHaveBeenCalledTimes(2);
   });
 });
-

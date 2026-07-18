@@ -31,4 +31,3 @@ describe("InputDeviceDialRenderer", () => {
     expect(payload.idleLabel.value).toBe("No Input");
   });
 });
-

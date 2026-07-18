@@ -97,4 +97,3 @@ describe("DeviceDialRenderer", () => {
     expect(payload.idleLabel.value).toBe("Muted Device");
   });
 });
-

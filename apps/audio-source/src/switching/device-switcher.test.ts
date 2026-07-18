@@ -110,4 +110,3 @@ describe("DeviceSwitcher", () => {
     expect(result.changed).toBe(true);
   });
 });
-

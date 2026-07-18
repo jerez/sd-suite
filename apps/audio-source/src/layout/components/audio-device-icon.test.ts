@@ -113,4 +113,3 @@ describe("renderAudioDeviceIcon", () => {
     expect(mutedIcon).toEqual(disabledIcon);
   });
 });
-

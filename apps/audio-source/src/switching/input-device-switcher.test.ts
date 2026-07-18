@@ -55,4 +55,3 @@ describe("InputDeviceSwitcher", () => {
     expect(active).toBe("No Input");
   });
 });
-
