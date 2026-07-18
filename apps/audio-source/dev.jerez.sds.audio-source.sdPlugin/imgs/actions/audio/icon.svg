@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" role="img" aria-labelledby="title">
+  <title id="title">Audio routing action icon</title>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+    <path d="M4.5 10h10.8" />
+    <path d="m13 7 3 3-3 3" />
+    <path d="M7 7.5v5M9.4 6.5v7M11.8 8v4" />
+  </g>
+  <circle cx="3" cy="10" r="2" fill="#FFFFFF" />
+  <circle cx="17" cy="10" r="2" fill="#FFFFFF" />
+</svg>

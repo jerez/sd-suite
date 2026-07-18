@@ -7,9 +7,11 @@
         {
             "Name": "Cycle Audio Output Device",
             "UUID": "dev.jerez.sds.audio-source.cycle-audio-output",
-            "Icon": "imgs/actions/audio/encoder",
+            "Icon": "imgs/actions/audio/icon",
             "Tooltip": "Rotate to cycle output devices. Press to refresh the device list.",
-            "Controllers": ["Encoder"],
+            "Controllers": [
+                "Encoder"
+            ],
             "Encoder": {
                 "Icon": "imgs/actions/audio/encoder",
                 "layout": "layouts/output-device.json",
@@ -19,15 +21,21 @@
                     "Touch": "Show output details"
                 }
             },
-            "States": [{ "Image": "imgs/actions/audio/encoder" }],
+            "States": [
+                {
+                    "Image": "imgs/actions/audio/encoder"
+                }
+            ],
             "UserTitleEnabled": false
         },
         {
             "Name": "Cycle Audio Input Device",
             "UUID": "dev.jerez.sds.audio-source.cycle-audio-input",
-            "Icon": "imgs/actions/audio/encoder",
+            "Icon": "imgs/actions/audio/icon",
             "Tooltip": "Rotate to cycle input devices. Press to refresh the device list.",
-            "Controllers": ["Encoder"],
+            "Controllers": [
+                "Encoder"
+            ],
             "Encoder": {
                 "Icon": "imgs/actions/audio/encoder",
                 "layout": "layouts/output-device.json",
@@ -37,7 +45,11 @@
                     "Touch": "Show input details"
                 }
             },
-            "States": [{ "Image": "imgs/actions/audio/encoder" }],
+            "States": [
+                {
+                    "Image": "imgs/actions/audio/encoder"
+                }
+            ],
             "UserTitleEnabled": false
         }
     ],
@@ -45,13 +57,24 @@
     "CategoryIcon": "imgs/plugin/category-icon",
     "CodePath": "bin/plugin.js",
     "Description": "Audio source management",
-    "Icon": "imgs/plugin/marketplace",
+    "Icon": "imgs/plugin/icon",
     "SDKVersion": 3,
-    "Software": { "MinimumVersion": "6.9" },
+    "Software": {
+        "MinimumVersion": "6.9"
+    },
     "OS": [
-        { "Platform": "mac", "MinimumVersion": "12" },
-        { "Platform": "windows", "MinimumVersion": "10" }
+        {
+            "Platform": "mac",
+            "MinimumVersion": "12"
+        },
+        {
+            "Platform": "windows",
+            "MinimumVersion": "10"
+        }
     ],
-    "Nodejs": { "Version": "20", "Debug": "enabled" },
+    "Nodejs": {
+        "Version": "20",
+        "Debug": "enabled"
+    },
     "UUID": "dev.jerez.sds.audio-source"
 }
