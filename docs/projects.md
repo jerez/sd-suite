@@ -8,6 +8,7 @@ truth for plugin behavior, setup, and limits.
 
 | Project      | Overview                                 | User Guide                                            | Developer Guide                                                 | Visual Identity                                                 |
 | ------------ | ---------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
+| Audio Source | [README](../apps/audio-source/README.md) | [User Guide](../apps/audio-source/docs/user-guide.md) | [Developer Guide](../apps/audio-source/docs/developer-guide.md) | [Visual Identity](../apps/audio-source/docs/visual-identity.md) |
 | Control Mesh | [README](../apps/control-mesh/README.md) | [User Guide](../apps/control-mesh/docs/user-guide.md) | [Developer Guide](../apps/control-mesh/docs/developer-guide.md) | [Visual Identity](../apps/control-mesh/docs/visual-identity.md) |
 | USB Link     | [README](../apps/usb-link/README.md)     | [User Guide](../apps/usb-link/docs/user-guide.md)     | [Developer Guide](../apps/usb-link/docs/developer-guide.md)     | [Visual Identity](../apps/usb-link/docs/visual-identity.md)     |
 

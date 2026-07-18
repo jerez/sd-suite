@@ -8,26 +8,26 @@ import type { AudioDevice } from "./types";
  * signature to keep the switching logic platform-agnostic.
  */
 export interface AudioDeviceApi {
-  /**
-   * Lists currently available devices.
-   */
-  getAudioDevices(): Promise<AudioDevice[]>;
+	/**
+	 * Lists currently available devices.
+	 */
+	getAudioDevices(): Promise<AudioDevice[]>;
 
-  /**
-   * Gets the current default device.
-   */
-  getDefaultDevice(): Promise<AudioDevice | null>;
+	/**
+	 * Gets the current default device.
+	 */
+	getDefaultDevice(): Promise<AudioDevice | null>;
 
-  /**
-   * Sets the current default device by id.
-   */
-  setDefaultDevice(deviceId: string): Promise<void>;
+	/**
+	 * Sets the current default device by id.
+	 */
+	setDefaultDevice(deviceId: string): Promise<void>;
 
-  /**
-   * Subscribes to native default-device changes.
-   *
-   * Implementations should invoke `listener` whenever the OS default
-   * device changes outside this plugin. Returns a cleanup function.
-   */
-  subscribeDefaultDeviceChanges(listener: () => void): Promise<() => void>;
+	/**
+	 * Subscribes to native default-device changes.
+	 *
+	 * Implementations should invoke `listener` whenever the OS default
+	 * device changes outside this plugin. Returns a cleanup function.
+	 */
+	subscribeDefaultDeviceChanges(listener: () => void): Promise<() => void>;
 }

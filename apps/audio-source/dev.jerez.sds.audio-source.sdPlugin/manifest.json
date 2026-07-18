@@ -9,9 +9,7 @@
             "UUID": "dev.jerez.sds.audio-source.cycle-audio-output",
             "Icon": "imgs/actions/audio/icon",
             "Tooltip": "Rotate to cycle output devices. Press to refresh the device list.",
-            "Controllers": [
-                "Encoder"
-            ],
+            "Controllers": ["Encoder"],
             "Encoder": {
                 "Icon": "imgs/actions/audio/encoder",
                 "layout": "layouts/output-device.json",
@@ -33,9 +31,7 @@
             "UUID": "dev.jerez.sds.audio-source.cycle-audio-input",
             "Icon": "imgs/actions/audio/icon",
             "Tooltip": "Rotate to cycle input devices. Press to refresh the device list.",
-            "Controllers": [
-                "Encoder"
-            ],
+            "Controllers": ["Encoder"],
             "Encoder": {
                 "Icon": "imgs/actions/audio/encoder",
                 "layout": "layouts/output-device.json",

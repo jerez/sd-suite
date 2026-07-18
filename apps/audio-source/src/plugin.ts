@@ -6,9 +6,9 @@ import { CycleAudioOutputDevice } from "./actions/cycle-audio-output-device";
 streamDeck.logger.setLevel("error");
 
 async function main(): Promise<void> {
-  streamDeck.actions.registerAction(new CycleAudioInputDevice());
-  streamDeck.actions.registerAction(new CycleAudioOutputDevice());
-  await streamDeck.connect();
+	streamDeck.actions.registerAction(new CycleAudioInputDevice());
+	streamDeck.actions.registerAction(new CycleAudioOutputDevice());
+	await streamDeck.connect();
 }
 
 void main();
