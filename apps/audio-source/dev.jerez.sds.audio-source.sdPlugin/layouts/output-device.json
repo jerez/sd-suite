@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schemas.elgato.com/streamdeck/plugins/layout.json",
+    "id": "dev.jerez.sds.audio-source.output-device",
+    "items": [
+        { "type": "pixmap", "key": "idleIcon", "rect": [81, 10, 38, 38], "zOrder": 10 },
+        {
+            "type": "text",
+            "key": "idleLabel",
+            "rect": [10, 54, 180, 30],
+            "alignment": "center",
+            "font": { "size": 18, "weight": 500 },
+            "text-overflow": "fade",
+            "zOrder": 11
+        },
+        { "type": "pixmap", "key": "browsePrevIcon", "rect": [36, 14, 28, 28], "zOrder": 20 },
+        { "type": "pixmap", "key": "browseCenterIcon", "rect": [81, 10, 38, 38], "zOrder": 21 },
+        { "type": "pixmap", "key": "browseNextIcon", "rect": [136, 14, 28, 28], "zOrder": 22 },
+        {
+            "type": "text",
+            "key": "browseLabel",
+            "rect": [10, 54, 180, 30],
+            "alignment": "center",
+            "font": { "size": 18, "weight": 500 },
+            "text-overflow": "fade",
+            "zOrder": 23
+        },
+        {
+            "type": "text",
+            "key": "confirmLabel",
+            "rect": [10, 34, 180, 32],
+            "alignment": "center",
+            "font": { "size": 20, "weight": 600 },
+            "text-overflow": "fade",
+            "zOrder": 30
+        },
+        { "type": "pixmap", "key": "detailTransportIcon", "rect": [24, 14, 18, 18], "zOrder": 40 },
+        {
+            "type": "text",
+            "key": "detailTransportLabel",
+            "rect": [46, 12, 144, 22],
+            "alignment": "left",
+            "font": { "size": 14, "weight": 500 },
+            "text-overflow": "fade",
+            "zOrder": 41
+        },
+        {
+            "type": "text",
+            "key": "detailDeviceLabel",
+            "rect": [10, 40, 180, 40],
+            "alignment": "center",
+            "font": { "size": 18, "weight": 500 },
+            "text-overflow": "fade",
+            "zOrder": 42
+        }
+    ]
+}
