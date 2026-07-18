@@ -5,6 +5,15 @@ Windows audio device from an encoder dial. It gives users separate actions for
 output and input devices, and gives maintainers package-local commands and
 guides for changing or verifying the plugin.
 
+## Migration provenance
+
+Audio Source was migrated from the standalone
+[`jerez/audio-source`](https://github.com/jerez/audio-source) repository. This
+package is now the maintained source for the plugin.
+
+The migration intentionally changed the plugin UUID from
+`dev.jerez.audio-source` to `dev.jerez.sds.audio-source`.
+
 ## Supported environment
 
 | Component              | Minimum version                             |
