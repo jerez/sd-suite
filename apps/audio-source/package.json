@@ -10,8 +10,10 @@
         "dev": "streamdeck dev",
         "link": "streamdeck link dev.jerez.sds.audio-source.sdPlugin",
         "restart": "streamdeck restart dev.jerez.sds.audio-source",
-        "validate": "streamdeck validate dev.jerez.sds.audio-source.sdPlugin --no-update-check",
-        "pack": "pnpm run build && streamdeck pack dev.jerez.sds.audio-source.sdPlugin -f --no-update-check",
+        "validate": "streamdeck validate dev.jerez.sds.audio-source.sdPlugin --no-update-check && pnpm run validate:source",
+        "validate:source": "vitest run src/manifest.test.ts src/package-assets.test.ts",
+        "validate:package": "node scripts/validate-native-packaging.mjs",
+        "pack": "pnpm run build && streamdeck pack dev.jerez.sds.audio-source.sdPlugin -f --no-update-check && pnpm run validate:package",
         "typecheck": "tsc --noEmit",
         "lint": "eslint . --max-warnings 0",
         "test": "vitest run --passWithNoTests"
