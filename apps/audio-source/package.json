@@ -1,0 +1,36 @@
+{
+    "name": "audio-source",
+    "private": true,
+    "version": "0.1.0",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "build": "rollup -c",
+        "watch": "rollup -c -w --watch.onEnd=\"streamdeck restart dev.jerez.sds.audio-source\"",
+        "dev": "streamdeck dev",
+        "link": "streamdeck link dev.jerez.sds.audio-source.sdPlugin",
+        "restart": "streamdeck restart dev.jerez.sds.audio-source",
+        "validate": "streamdeck validate dev.jerez.sds.audio-source.sdPlugin --no-update-check && pnpm run validate:source",
+        "validate:source": "vitest run src/manifest.test.ts src/package-assets.test.ts",
+        "validate:package": "node scripts/validate-native-packaging.mjs",
+        "pack": "pnpm run build && streamdeck pack dev.jerez.sds.audio-source.sdPlugin -f --no-update-check && prettier dev.jerez.sds.audio-source.sdPlugin/manifest.json --write && pnpm run validate:package",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint . --max-warnings 0",
+        "test": "vitest run --passWithNoTests"
+    },
+    "dependencies": {
+        "@elgato/streamdeck": "2.1.0",
+        "lucide": "^0.577.0"
+    },
+    "devDependencies": {
+        "@elgato/cli": "1.7.4",
+        "@rollup/plugin-commonjs": "^29.0.2",
+        "@rollup/plugin-node-resolve": "^15.2.2",
+        "@rollup/plugin-terser": "^1.0.0",
+        "@rollup/plugin-typescript": "^12.1.0",
+        "@types/node": "~24.12.4",
+        "rollup": "^4.0.2",
+        "tslib": "^2.6.2",
+        "typescript": "^5.2.2"
+    }
+}

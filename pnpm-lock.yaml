@@ -57,6 +57,43 @@ importers:
         specifier: 3.2.6
         version: 3.2.6(@types/node@24.12.4)(jiti@2.6.1)(msw@2.14.6(@types/node@24.12.4)(typescript@5.9.3))(terser@5.48.0)(yaml@2.9.0)
 
+  apps/audio-source:
+    dependencies:
+      '@elgato/streamdeck':
+        specifier: 2.1.0
+        version: 2.1.0
+      lucide:
+        specifier: ^0.577.0
+        version: 0.577.0
+    devDependencies:
+      '@elgato/cli':
+        specifier: 1.7.4
+        version: 1.7.4(@types/node@24.12.4)
+      '@rollup/plugin-commonjs':
+        specifier: ^29.0.2
+        version: 29.0.3(rollup@4.61.1)
+      '@rollup/plugin-node-resolve':
+        specifier: ^15.2.2
+        version: 15.3.1(rollup@4.61.1)
+      '@rollup/plugin-terser':
+        specifier: ^1.0.0
+        version: 1.0.0(rollup@4.61.1)
+      '@rollup/plugin-typescript':
+        specifier: ^12.1.0
+        version: 12.3.0(rollup@4.61.1)(tslib@2.8.1)(typescript@5.9.3)
+      '@types/node':
+        specifier: ~24.12.4
+        version: 24.12.4
+      rollup:
+        specifier: ^4.0.2
+        version: 4.61.1
+      tslib:
+        specifier: ^2.6.2
+        version: 2.8.1
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.3
+
   apps/control-mesh:
     dependencies:
       '@elgato/streamdeck':
@@ -2845,6 +2882,7 @@ packages:
   git-raw-commits@5.0.1:
     resolution: {integrity: sha512-Y+csSm2GD/PCSh6Isd/WiMjNAydu0VBiG9J7EdQsNA5P9uXvLayqjmTsNlK5Gs9IhblFZqOU0yid5Il5JPoLiQ==}
     engines: {node: '>=18'}
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -3213,6 +3251,9 @@ packages:
     resolution: {integrity: sha512-9FA9evdox/JQL5PT57fdA1x/yg8T7knJ98+zjTL3UfKza6pflQUUh3XtaQIHKvnsJw1lmsEyHVlt5jchYxOQ5w==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lucide@0.577.0:
+    resolution: {integrity: sha512-PpC/m5eOItp/WU/GlQPFBXDOhq6HibL73KzYP37OX3LM7VmzWQF8voEj8QRWUFvy9FIKfeDQkWYoyS1D/MdWFA==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -5687,6 +5728,18 @@ snapshots:
     optionalDependencies:
       rollup: 4.61.0
 
+  '@rollup/plugin-commonjs@29.0.3(rollup@4.61.1)':
+    dependencies:
+      '@rollup/pluginutils': 5.4.0(rollup@4.61.1)
+      commondir: 1.0.1
+      estree-walker: 2.0.2
+      fdir: 6.5.0(picomatch@4.0.4)
+      is-reference: 1.2.1
+      magic-string: 0.30.21
+      picomatch: 4.0.4
+    optionalDependencies:
+      rollup: 4.61.1
+
   '@rollup/plugin-json@6.1.0(rollup@4.61.0)':
     dependencies:
       '@rollup/pluginutils': 5.4.0(rollup@4.61.0)
@@ -5702,6 +5755,16 @@ snapshots:
       resolve: 1.22.12
     optionalDependencies:
       rollup: 4.61.0
+
+  '@rollup/plugin-node-resolve@15.3.1(rollup@4.61.1)':
+    dependencies:
+      '@rollup/pluginutils': 5.4.0(rollup@4.61.1)
+      '@types/resolve': 1.20.2
+      deepmerge: 4.3.1
+      is-module: 1.0.0
+      resolve: 1.22.12
+    optionalDependencies:
+      rollup: 4.61.1
 
   '@rollup/plugin-node-resolve@16.0.3(rollup@4.61.0)':
     dependencies:
@@ -5721,6 +5784,14 @@ snapshots:
     optionalDependencies:
       rollup: 4.61.0
 
+  '@rollup/plugin-terser@1.0.0(rollup@4.61.1)':
+    dependencies:
+      serialize-javascript: 7.0.5
+      smob: 1.6.2
+      terser: 5.48.0
+    optionalDependencies:
+      rollup: 4.61.1
+
   '@rollup/plugin-typescript@12.3.0(rollup@4.61.0)(tslib@2.8.1)(typescript@5.9.3)':
     dependencies:
       '@rollup/pluginutils': 5.4.0(rollup@4.61.0)
@@ -5730,6 +5801,15 @@ snapshots:
       rollup: 4.61.0
       tslib: 2.8.1
 
+  '@rollup/plugin-typescript@12.3.0(rollup@4.61.1)(tslib@2.8.1)(typescript@5.9.3)':
+    dependencies:
+      '@rollup/pluginutils': 5.4.0(rollup@4.61.1)
+      resolve: 1.22.12
+      typescript: 5.9.3
+    optionalDependencies:
+      rollup: 4.61.1
+      tslib: 2.8.1
+
   '@rollup/pluginutils@5.4.0(rollup@4.61.0)':
     dependencies:
       '@types/estree': 1.0.9
@@ -5737,6 +5817,14 @@ snapshots:
       picomatch: 4.0.4
     optionalDependencies:
       rollup: 4.61.0
+
+  '@rollup/pluginutils@5.4.0(rollup@4.61.1)':
+    dependencies:
+      '@types/estree': 1.0.9
+      estree-walker: 2.0.2
+      picomatch: 4.0.4
+    optionalDependencies:
+      rollup: 4.61.1
 
   '@rollup/rollup-android-arm-eabi@4.61.0':
     optional: true
@@ -7141,6 +7229,8 @@ snapshots:
   lucide-react@1.17.0(react@19.2.6):
     dependencies:
       react: 19.2.6
+
+  lucide@0.577.0: {}
 
   magic-string@0.30.21:
     dependencies:

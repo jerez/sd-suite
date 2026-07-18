@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" role="img" aria-labelledby="title">
+  <title id="title">Audio routing encoder icon</title>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+    <path d="M17 36h38" />
+    <path d="m47 28 8 8-8 8" />
+    <path d="M25 29v14M31 25v22M37 30v12M43 27v18" />
+  </g>
+  <circle cx="13" cy="36" r="6" fill="#FFFFFF" />
+  <circle cx="59" cy="36" r="6" fill="#FFFFFF" />
+</svg>
