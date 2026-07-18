@@ -41,7 +41,7 @@ describe("audio-source package assets", () => {
 		await expect(access(new URL(relativePath, pluginRoot))).resolves.toBeUndefined();
 	});
 
-	it.each(pngAssets)("encodes %s as metadata-free RGBA at %ix%i", async (relativePath, width, height) => {
+	it.each(pngAssets)("encodes %s as RGBA without EXIF at %ix%i", async (relativePath, width, height) => {
 		const png = await readFile(new URL(relativePath, pluginRoot));
 
 		expect(png.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));

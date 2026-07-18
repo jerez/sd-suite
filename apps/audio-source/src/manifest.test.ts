@@ -31,4 +31,15 @@ describe("audio-source manifest", () => {
 			expect(action.Encoder.layout).toBe("layouts/output-device.json");
 		}
 	});
+
+	it("describes encoder rotation as preview and push as confirmation", async () => {
+		const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+
+		expect(manifest.Actions[0].Tooltip).toBe(
+			"Rotate to preview output devices. Press to confirm the selected output device.",
+		);
+		expect(manifest.Actions[1].Tooltip).toBe(
+			"Rotate to preview input devices. Press to confirm the selected input device.",
+		);
+	});
 });

@@ -8,7 +8,7 @@
             "Name": "Cycle Audio Output Device",
             "UUID": "dev.jerez.sds.audio-source.cycle-audio-output",
             "Icon": "imgs/actions/audio/icon",
-            "Tooltip": "Rotate to cycle output devices. Press to refresh the device list.",
+            "Tooltip": "Rotate to preview output devices. Press to confirm the selected output device.",
             "Controllers": ["Encoder"],
             "Encoder": {
                 "Icon": "imgs/actions/audio/encoder",
@@ -30,7 +30,7 @@
             "Name": "Cycle Audio Input Device",
             "UUID": "dev.jerez.sds.audio-source.cycle-audio-input",
             "Icon": "imgs/actions/audio/icon",
-            "Tooltip": "Rotate to cycle input devices. Press to refresh the device list.",
+            "Tooltip": "Rotate to preview input devices. Press to confirm the selected input device.",
             "Controllers": ["Encoder"],
             "Encoder": {
                 "Icon": "imgs/actions/audio/encoder",
