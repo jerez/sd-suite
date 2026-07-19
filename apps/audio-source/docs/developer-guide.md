@@ -129,17 +129,19 @@ tests.
 Compile and exercise the native bridge for the current host platform:
 
 ```bash
-pnpm --filter audio-source native:build
+pnpm native:build --filter=audio-source
 pnpm --filter audio-source native:validate
 pnpm --filter audio-source native:test
 ```
 
-These commands write ignored output under `.native/`, validate its executable
-format, and run the compiled `self-test output` protocol. On macOS, the local
-build contains the current architecture. The release build is the only command
-that combines x86_64 and arm64 into one executable. The Windows self-test also
-checks the compiled COM metadata used by the bridge, including native method
-order and preserved HRESULT signatures.
+The root `native:build` Turbo task is the shared current-platform entry point
+used locally, in normal CI, and by CodeQL. These commands write ignored output
+under `.native/`, validate its executable format, and run the compiled
+`self-test output` protocol. On macOS, the local build contains the current
+architecture. The release build is the only command that combines x86_64 and
+arm64 into one executable. The Windows self-test also checks the compiled COM
+metadata used by the bridge, including native method order and preserved
+HRESULT signatures.
 
 ## Stage interpreted development mode
 

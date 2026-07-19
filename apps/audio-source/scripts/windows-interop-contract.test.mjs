@@ -52,4 +52,8 @@ describe("Windows COM interop source contract", () => {
 			}
 		}
 	});
+
+	it("copies readonly property keys before passing them by reference", () => {
+		expect(source).not.toMatch(/GetValue\(ref PKEY_/u);
+	});
 });

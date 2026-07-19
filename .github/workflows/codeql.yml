@@ -30,24 +30,23 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - if: matrix.language == 'swift'
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - if: matrix.language == 'swift'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+          standalone: false
+      - if: matrix.language == 'swift'
+        run: pnpm install --frozen-lockfile
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
       - if: matrix.language == 'swift'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
-          standalone: true
-      - if: matrix.language == 'swift'
-        uses: actions/setup-node@v5
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - if: matrix.language == 'swift'
-        run: pnpm install --frozen-lockfile
-      - if: matrix.language == 'swift'
-        run: pnpm --filter audio-source native:build
+        run: pnpm native:build --filter=audio-source
       - uses: github/codeql-action/analyze@v4
         with:
           category: /language:${{ matrix.language }}

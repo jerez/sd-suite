@@ -536,7 +536,8 @@ public static class AudioEndpointBridge {
     /// </summary>
     private static string GetDeviceFormFactor(IPropertyStore propertyStore) {
         PROPVARIANT value;
-        int hr = propertyStore.GetValue(ref PKEY_AudioEndpoint_FormFactor, out value);
+        PROPERTYKEY key = PKEY_AudioEndpoint_FormFactor;
+        int hr = propertyStore.GetValue(ref key, out value);
 
         if (hr < 0) {
             return "unknown";

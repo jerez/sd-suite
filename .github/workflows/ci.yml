@@ -77,7 +77,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build native bridge
-        run: pnpm --filter audio-source native:build
+        run: pnpm native:build --filter=audio-source
 
       - name: Validate native bridge
         run: pnpm --filter audio-source native:validate
@@ -110,7 +110,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build native bridge
-        run: pnpm --filter audio-source native:build
+        run: pnpm native:build --filter=audio-source
 
       - name: Validate native bridge
         run: pnpm --filter audio-source native:validate
