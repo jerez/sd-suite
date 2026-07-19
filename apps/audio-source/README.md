@@ -20,7 +20,8 @@ The migration intentionally changed the plugin UUID from
 | ---------------------- | ------------------------------------------- |
 | Stream Deck            | 6.9                                         |
 | macOS                  | 12                                          |
-| Windows                | 10                                          |
+| Windows                | 64-bit Windows 10 or later                  |
+| .NET Framework         | 4.7.2 or later on Windows                   |
 | Stream Deck controller | Encoder-capable model, such as Stream Deck+ |
 
 ## Actions

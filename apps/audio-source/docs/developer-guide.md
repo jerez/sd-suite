@@ -55,8 +55,10 @@ The installed plugin contains one compiled bridge for each supported platform:
 
 The macOS executable calls CoreAudio. The Windows executable calls Windows Core
 Audio COM and sets the console, multimedia, and communications default roles.
-The Windows release does not bundle a .NET runtime. It relies on the framework
-provided by the Windows host.
+The Windows bridge requires 64-bit Windows 10 or later and .NET Framework 4.7.2
+or later on the host. The Windows release does not bundle a .NET runtime. See
+Microsoft's [.NET Framework system requirements](https://learn.microsoft.com/en-us/dotnet/framework/get-started/system-requirements)
+for supported host details.
 
 Production resolution requires the compiled executable for the current
 platform. A missing executable produces `Compiled macOS audio bridge not found.`
@@ -97,7 +99,10 @@ earlier output lines by parsing the last non-empty line.
 
 `watch` writes `ready` after registering listeners, followed by one
 line-delimited `changed` message for each relevant device event. The TypeScript
-adapter reacts only to `changed`.
+adapter does not complete the subscription until it receives `ready`. A launch
+error, early exit, or 10-second startup timeout rejects the subscription with
+bounded standard-error context. After startup, the adapter reacts only to
+`changed` and logs an unexpected bridge exit.
 
 Query and set child processes time out after 15 seconds and have a 2 MiB output
 limit. Watch processes remain active while at least one corresponding dial
@@ -132,7 +137,9 @@ pnpm --filter audio-source native:test
 These commands write ignored output under `.native/`, validate its executable
 format, and run the compiled `self-test output` protocol. On macOS, the local
 build contains the current architecture. The release build is the only command
-that combines x86_64 and arm64 into one executable.
+that combines x86_64 and arm64 into one executable. The Windows self-test also
+checks the compiled COM metadata used by the bridge, including native method
+order and preserved HRESULT signatures.
 
 ## Stage interpreted development mode
 
@@ -166,7 +173,8 @@ artifacts:
 - The Linux job runs formatting, linting, type checking, tests, and plugin
   validation.
 - The macOS and Windows jobs build, validate, and self-test their current-host
-  native executable.
+  native executable. The Windows job also runs non-mutating `query output` and
+  bounded `watch output` startup smoke checks against Windows Core Audio.
 - No normal CI job stages package binaries, uploads native artifacts, creates an
   installer, or publishes a release.
 
@@ -190,7 +198,8 @@ The workflow performs these steps:
 
 1. macOS builds and validates a macOS 12 universal `arm64` and `x86_64`
    executable with SwiftPM and `lipo`.
-2. Windows builds, validates, and tests the x64 `net472` executable.
+2. Windows builds, validates, self-tests, and smoke-tests the x64 `net472`
+   executable without changing the host's default endpoint.
 3. Each platform uploads its compiled bridge as a short-lived workflow
    artifact.
 4. The assembly job downloads both artifacts, stages them into the `.sdPlugin`,
@@ -233,8 +242,9 @@ Required compiled native package assets are present.
 
 ## Manual verification on Windows
 
-1. Install the same release workflow's `.streamDeckPlugin` file on Windows 10
-   or later with Stream Deck 6.9 or later.
+1. Install the same release workflow's `.streamDeckPlugin` file on 64-bit
+   Windows 10 or later with .NET Framework 4.7.2 or later and Stream Deck 6.9
+   or later.
 2. Repeat the rotate, push, touch, external-change, and timeout checks from the
    macOS procedure for both actions.
 3. After pushing, confirm in Windows sound settings that the selected endpoint

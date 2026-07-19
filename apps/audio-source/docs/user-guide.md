@@ -6,7 +6,8 @@ default audio output or input device without opening system settings.
 ## Requirements
 
 - Stream Deck 6.9 or later
-- macOS 12 or later, or Windows 10 or later
+- macOS 12 or later, or 64-bit Windows 10 or later
+- .NET Framework 4.7.2 or later on Windows
 - An encoder-capable Stream Deck, such as Stream Deck+
 - At least one audio endpoint recognized by the operating system
 
