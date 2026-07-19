@@ -40,18 +40,24 @@ and troubleshooting.
 
 ```text
 apps/audio-source/
-  dev.jerez.sds.audio-source.sdPlugin/  Manifest, layouts, assets, and native bridges
-  docs/                                  User, developer, and visual guides
-  scripts/                               Packaged-archive validation
-  src/actions/                           Stream Deck event orchestration
-  src/audio/                             Platform contracts and adapters
-  src/layout/                            Encoder feedback renderers
-  src/shared/                            Time-based cache
-  src/switching/                         Platform-independent selection logic
+  native/macos/                         SwiftPM bridge source
+  native/windows/                       .NET Framework bridge source
+  .native/                              Ignored local and release build output
+  dev.jerez.sds.audio-source.sdPlugin/  Plugin assets and staged release binaries
+  scripts/                              Native build, staging, and package validation
+  docs/                                 User, developer, and visual guides
+  src/                                  Plugin runtime, platform adapters, and tests
 ```
 
-The plugin uses the platform's built-in audio APIs through packaged native
-bridges. It does not require a separate audio-device utility.
+Installed plugins run `native/macos/audio-bridge` on macOS or
+`native/windows/audio-bridge.exe` on Windows. These compiled bridges use the
+platform's built-in audio APIs. They do not require a separate audio-device
+utility.
+
+Normal CI has dedicated macOS and Windows jobs that build, validate, and test
+the corresponding bridge. It does not stage binaries, create an installer, or
+upload native artifacts. The explicit Audio Source release workflow builds
+both platforms and assembles the complete cross-platform installer.
 
 ## Maintainer commands
 
@@ -64,13 +70,28 @@ pnpm --filter audio-source test
 pnpm --filter audio-source typecheck
 pnpm --filter audio-source lint
 pnpm --filter audio-source validate
-pnpm --filter audio-source run pack
 ```
 
 `build` writes the plugin backend to the `.sdPlugin/bin/` directory. `validate`
-checks the manifest and required source assets. `run pack` builds the plugin,
-creates the `.streamDeckPlugin` installer in `apps/audio-source/`, and verifies
-that the native bridge files are inside the archive.
+checks the manifest, required project sources, and production package boundary.
+
+Use these commands on macOS or Windows to compile and verify the native bridge
+for the current platform:
+
+```bash
+pnpm --filter audio-source native:build
+pnpm --filter audio-source native:validate
+pnpm --filter audio-source native:test
+pnpm --filter audio-source native:stage:development
+```
+
+`native:stage:development` explicitly stages interpreted source for local
+Stream Deck development and writes `native/.development-mode`. Production does
+not fall back to interpreted source when a compiled bridge is missing. Run
+`pnpm --filter audio-source native:clean` to remove staged development files.
+
+See the developer guide for the native command protocol, CI boundary, and
+`audio-source-v<version>` release process.
 
 ## Maintainer guides
 

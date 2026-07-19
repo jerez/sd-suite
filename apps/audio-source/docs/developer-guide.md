@@ -1,7 +1,8 @@
 # Audio Source developer guide
 
-This guide explains how maintainers can trace, test, validate, package, and
-manually verify Audio Source from the `sd-suite` workspace.
+This guide explains how Audio Source maintainers can trace the runtime, verify
+native bridges, develop locally, and publish a cross-platform plugin from the
+`sd-suite` workspace.
 
 ## Runtime data flow
 
@@ -33,17 +34,46 @@ stays behind `AudioDeviceApi`.
 | `src/plugin.ts`                                | Registers both actions and connects to Stream Deck.                      |
 | `src/actions/`                                 | Coordinates SDK events, caches, switching, subscriptions, and rendering. |
 | `src/switching/`                               | Computes wrapped previews and confirms per-action selections.            |
-| `src/audio/`                                   | Defines normalized contracts and selects the platform adapter.           |
+| `src/audio/`                                   | Defines normalized contracts and resolves the platform bridge.           |
 | `src/shared/timed-cache.ts`                    | Caches reads and deduplicates concurrent misses.                         |
 | `src/layout/`                                  | Builds SVG feedback and the four encoder display modes.                  |
-| `dev.jerez.sds.audio-source.sdPlugin/native/`  | Contains the Swift and PowerShell/C# bridges shipped with the plugin.    |
+| `native/macos/`                                | Defines the macOS SwiftPM executable.                                    |
+| `native/windows/`                              | Defines the Windows x64 `net472` executable.                             |
+| `.native/`                                     | Holds ignored native build output.                                       |
+| `dev.jerez.sds.audio-source.sdPlugin/native/`  | Holds staged development files or compiled release binaries.             |
 | `dev.jerez.sds.audio-source.sdPlugin/layouts/` | Defines the 200 by 100 encoder feedback layout.                          |
-| `scripts/validate-native-packaging.mjs`        | Checks required native files in the packed archive.                      |
+| `scripts/`                                     | Builds, tests, stages, cleans, and validates native artifacts.           |
 
-## Native bridge line protocol
+## Production native bridges
 
-Both adapters accept `output` and `input` scopes and return one compact JSON
-object for `query` and `set`:
+The installed plugin contains one compiled bridge for each supported platform:
+
+| Platform | Installed path                    | Build target                                       |
+| -------- | --------------------------------- | -------------------------------------------------- |
+| macOS    | `native/macos/audio-bridge`       | SwiftPM, macOS 12 or later, universal x86_64/arm64 |
+| Windows  | `native/windows/audio-bridge.exe` | x64 .NET Framework 4.7.2 (`net472`)                |
+
+The macOS executable calls CoreAudio. The Windows executable calls Windows Core
+Audio COM and sets the console, multimedia, and communications default roles.
+The Windows release does not bundle a .NET runtime. It relies on the framework
+provided by the Windows host.
+
+Production resolution requires the compiled executable for the current
+platform. A missing executable produces `Compiled macOS audio bridge not found.`
+or `Compiled Windows audio bridge not found.`. The runtime never selects source
+code as an automatic fallback.
+
+## Native bridge process protocol
+
+Both compiled executables accept positional arguments:
+
+```text
+audio-bridge query <output|input>
+audio-bridge set <output|input> <device-id>
+audio-bridge watch <output|input>
+```
+
+`query` and `set` write one compact JSON object:
 
 ```json
 {
@@ -65,43 +95,18 @@ Fields after `name` can be unavailable. The TypeScript parser keeps valid
 string `id` and `name` pairs, treats a missing default ID as `null`, and ignores
 earlier output lines by parsing the last non-empty line.
 
-### macOS process contract
-
-The adapter invokes `/usr/bin/swift` with one of these argument forms:
-
-```text
-audio-bridge.swift query <output|input>
-audio-bridge.swift set <output|input> <device-id>
-audio-bridge.swift watch <output|input>
-```
-
-The watcher writes `ready` once and then one `changed` line for each relevant
-default-device or mute event. The TypeScript adapter reacts only to `changed`.
-
-### Windows process contract
-
-The adapter invokes `powershell.exe` with the packaged `audio-bridge.ps1`. It
-passes inputs through these environment variables:
-
-| Variable             | Values                                 |
-| -------------------- | -------------------------------------- |
-| `SD_AUDIO_ACTION`    | `query`, `set`, or `watch`             |
-| `SD_AUDIO_FLOW`      | `output` or `input`                    |
-| `SD_AUDIO_DEVICE_ID` | Endpoint ID for `set`; empty otherwise |
-
-The PowerShell launcher compiles the packaged C# bridge. Its watcher writes
-`ready` once and then line-delimited `changed` events. A set operation updates
-the console, multimedia, and communications default roles before returning the
-new state.
+`watch` writes `ready` after registering listeners, followed by one
+line-delimited `changed` message for each relevant device event. The TypeScript
+adapter reacts only to `changed`.
 
 Query and set child processes time out after 15 seconds and have a 2 MiB output
 limit. Watch processes remain active while at least one corresponding dial
 action is visible.
 
-## Build and test
+## Build and test the current platform
 
 Use the Node.js version in the workspace `.nvmrc` and the pnpm version in the
-root `package.json`. From the workspace root, run:
+root `package.json`. Run the plugin checks from the workspace root:
 
 ```bash
 pnpm --filter audio-source build
@@ -116,31 +121,106 @@ cache, switcher behavior, device icons, and input/output dial renderers.
 `validate` runs the Elgato manifest validator and the focused manifest and asset
 tests.
 
-## Package and verify the archive
-
-Run the package script from the workspace root:
+Compile and exercise the native bridge for the current host platform:
 
 ```bash
-pnpm --filter audio-source run pack
+pnpm --filter audio-source native:build
+pnpm --filter audio-source native:validate
+pnpm --filter audio-source native:test
 ```
 
-The script builds first, creates
-`apps/audio-source/dev.jerez.sds.audio-source.streamDeckPlugin`, and then checks
-the archive with `scripts/validate-native-packaging.mjs`. A successful final
-line is:
+These commands write ignored output under `.native/`, validate its executable
+format, and run the compiled `self-test output` protocol. On macOS, the local
+build contains the current architecture. The release build is the only command
+that combines x86_64 and arm64 into one executable.
+
+## Stage interpreted development mode
+
+Local Stream Deck development can explicitly stage source for the current
+platform:
+
+```bash
+pnpm --filter audio-source native:stage:development
+```
+
+The command writes the platform name to
+`dev.jerez.sds.audio-source.sdPlugin/native/.development-mode` and stages only
+the corresponding source. macOS uses `/usr/bin/swift`. Windows uses the staged
+PowerShell launcher to compile the staged C# source for development only.
+
+The marker is an explicit mode switch. If its value does not match the running
+platform, startup fails. Without the marker, the runtime requires the compiled
+installed executable and does not fall back to source.
+
+Remove all staged native development files before production validation:
+
+```bash
+pnpm --filter audio-source native:clean
+```
+
+## CI and CodeQL responsibilities
+
+Normal CI verifies non-draft pull requests and pushes without producing release
+artifacts:
+
+- The Linux job runs formatting, linting, type checking, tests, and plugin
+  validation.
+- The macOS and Windows jobs build, validate, and self-test their current-host
+  native executable.
+- No normal CI job stages package binaries, uploads native artifacts, creates an
+  installer, or publishes a release.
+
+The advanced CodeQL workflow analyzes JavaScript/TypeScript and C# without a
+build. Swift analysis uses manual build mode and runs the package's native macOS
+build between CodeQL initialization and analysis. This gives CodeQL a traced
+SwiftPM compilation instead of relying on Swift autobuild discovery.
+
+## Create a cross-platform release
+
+The release workflow is the only supported cross-platform packaging path. Push
+an explicit tag matching `audio-source-v<version>` after the target commit is
+ready for release. For example:
+
+```bash
+git tag audio-source-v0.1.0
+git push origin audio-source-v0.1.0
+```
+
+The workflow performs these steps:
+
+1. macOS builds and validates a macOS 12 universal `arm64` and `x86_64`
+   executable with SwiftPM and `lipo`.
+2. Windows builds, validates, and tests the x64 `net472` executable.
+3. Each platform uploads its compiled bridge as a short-lived workflow
+   artifact.
+4. The assembly job downloads both artifacts, stages them into the `.sdPlugin`,
+   builds the JavaScript backend, and validates the staged and packed output.
+5. The workflow uploads `dev.jerez.sds.audio-source.streamDeckPlugin` and
+   publishes it on the matching GitHub release.
+
+The installer must contain both compiled paths:
 
 ```text
-Required package assets are present.
+native/macos/audio-bridge
+native/windows/audio-bridge.exe
 ```
 
-The archive check requires the encoder layout plus the Swift, PowerShell, and
-C# bridge files. The generated installer and `.sdPlugin/bin/` output are build
-artifacts and must remain untracked.
+The staging and archive validators reject native source, development markers,
+and compiler intermediates. The installer must not contain
+`native/.development-mode` or files ending in `.swift`, `.cs`, `.ps1`,
+`.csproj`, or `.pdb`. Native sources stay under `native/`; generated binaries,
+Swift scratch directories, staged native files, and installers remain ignored.
+
+A successful archive check ends with:
+
+```text
+Required compiled native package assets are present.
+```
 
 ## Manual verification on macOS
 
-1. Pack and install the `.streamDeckPlugin` file on macOS 12 or later with
-   Stream Deck 6.9 or later.
+1. Install the release workflow's `.streamDeckPlugin` file on macOS 12 or later
+   with Stream Deck 6.9 or later.
 2. Add both actions to separate encoder dials.
 3. For each action, rotate in both directions. Confirm that the carousel wraps
    and that the system default has not changed.
@@ -153,14 +233,14 @@ artifacts and must remain untracked.
 
 ## Manual verification on Windows
 
-1. Pack and install the `.streamDeckPlugin` file on Windows 10 or later with
-   Stream Deck 6.9 or later.
+1. Install the same release workflow's `.streamDeckPlugin` file on Windows 10
+   or later with Stream Deck 6.9 or later.
 2. Repeat the rotate, push, touch, external-change, and timeout checks from the
    macOS procedure for both actions.
 3. After pushing, confirm in Windows sound settings that the selected endpoint
    is the default. Test an input and an output endpoint.
-4. Restart Stream Deck and confirm that both actions load without a bridge-file
-   or PowerShell compilation error.
+4. Restart Stream Deck and confirm that both actions load without a native
+   bridge launch error.
 
 Manual platform verification is required because unit tests mock the platform
 contract and cannot exercise CoreAudio, Windows Core Audio COM, hardware event

@@ -10,14 +10,14 @@ default audio output or input device without opening system settings.
 - An encoder-capable Stream Deck, such as Stream Deck+
 - At least one audio endpoint recognized by the operating system
 
-Audio Source runs a packaged Swift bridge on macOS and packaged PowerShell and
-C# bridge files on Windows. Do not move or delete files inside the installed
-plugin directory. No separate audio switching utility is required.
+Audio Source includes small compiled bridges for macOS and Windows and uses the
+operating system's built-in audio APIs. No separate audio-device utility is
+required. Do not move or delete files inside the installed plugin directory.
 
-## Install the packed plugin
+## Install Audio Source
 
-1. Obtain the `dev.jerez.sds.audio-source.streamDeckPlugin` file produced by the
-   package command.
+1. Obtain `dev.jerez.sds.audio-source.streamDeckPlugin` from an Audio Source
+   release.
 2. Open the file with Stream Deck.
 3. Approve the installation when Stream Deck prompts you.
 4. Open the Stream Deck action list and find the **audio-source** category.
@@ -59,13 +59,13 @@ dials through a native device-change watcher.
 
 ## Troubleshooting
 
-| Symptom                                    | Check                                                                                                                              |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| The action is missing                      | Confirm that Stream Deck is 6.9 or later and that you are assigning it to an encoder, not a key.                                   |
-| The dial shows `No Output` or `No Input`   | Confirm that the operating system detects an endpoint for that direction. Reconnect or enable the device, then re-open the action. |
-| A push does not select the expected device | Rotate until the expected name is centered, then push before the 3.5-second preview timeout.                                       |
-| The dial shows `Error`                     | Restart Stream Deck once. If the error remains, reinstall the packed plugin so its native bridge files are restored.               |
-| External device changes do not appear      | Confirm the device changed in operating-system settings, then remove and re-add the action to restart its native watcher.          |
+| Symptom                                    | Check                                                                                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| The action is missing                      | Confirm that Stream Deck is 6.9 or later and that you are assigning it to an encoder, not a key.                                    |
+| The dial shows `No Output` or `No Input`   | Confirm that the operating system detects an endpoint for that direction. Reconnect or enable the device, then re-open the action.  |
+| A push does not select the expected device | Rotate until the expected name is centered, then push before the 3.5-second preview timeout.                                        |
+| The dial shows `Error`                     | Restart Stream Deck once. If the log reports a native bridge launch error, reinstall the plugin so the compiled bridge is restored. |
+| External device changes do not appear      | Confirm the device changed in operating-system settings, then remove and re-add the action to restart its native watcher.           |
 
 Audio Source only changes the operating-system default input or output endpoint.
 It does not control per-application routing, volume, mute state, device drivers,
