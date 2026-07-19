@@ -16,9 +16,15 @@ const childProcessMocks = vi.hoisted(() => {
 	return { execFile, spawn: vi.fn(), state };
 });
 
+const loggerMocks = vi.hoisted(() => ({ error: vi.fn() }));
+
 vi.mock("node:child_process", () => ({
 	execFile: childProcessMocks.execFile,
 	spawn: childProcessMocks.spawn,
+}));
+
+vi.mock("@elgato/streamdeck", () => ({
+	streamDeck: { logger: loggerMocks },
 }));
 
 import { audioInputApi, audioOutputApi } from "./mac";
@@ -28,12 +34,12 @@ let root = "";
 let executable = "";
 
 function createWatcher() {
-	return {
+	return Object.assign(new EventEmitter(), {
 		killed: false,
 		kill: vi.fn(),
 		stderr: new EventEmitter(),
 		stdout: new EventEmitter(),
-	};
+	});
 }
 
 beforeEach(() => {
@@ -45,6 +51,7 @@ beforeEach(() => {
 	writeFileSync(executable, "");
 	childProcessMocks.execFile.mockClear();
 	childProcessMocks.spawn.mockReset();
+	loggerMocks.error.mockReset();
 	childProcessMocks.state.stdout = JSON.stringify({ devices: [], defaultId: null });
 });
 
@@ -74,17 +81,26 @@ describe("macOS native bridge invocation", () => {
 		});
 	});
 
-	it("buffers watcher lines across chunks and terminates the compiled bridge", async () => {
+	it("waits for ready, buffers changed lines across chunks, and cleans up once", async () => {
 		const watcher = createWatcher();
 		childProcessMocks.spawn.mockReturnValue(watcher);
 		const listener = vi.fn();
 
-		const cleanup = await audioOutputApi.subscribeDefaultDeviceChanges(listener);
+		const subscription = audioOutputApi.subscribeDefaultDeviceChanges(listener);
 		expect(childProcessMocks.spawn).toHaveBeenCalledWith(executable, ["watch", "output"], {
 			stdio: ["ignore", "pipe", "pipe"],
 		});
+		let settled = false;
+		subscription.finally(() => {
+			settled = true;
+		});
+		await Promise.resolve();
+		expect(settled).toBe(false);
 
-		watcher.stdout.emit("data", Buffer.from("chan"));
+		watcher.stdout.emit("data", Buffer.from("rea"));
+		watcher.stdout.emit("data", Buffer.from("dy\nchan"));
+		const cleanup = await subscription;
+
 		watcher.stdout.emit("data", Buffer.from("ged\nignored\nchanged"));
 		expect(listener).toHaveBeenCalledTimes(1);
 		watcher.stdout.emit("data", Buffer.from("\n"));
@@ -92,8 +108,41 @@ describe("macOS native bridge invocation", () => {
 
 		cleanup();
 		expect(watcher.kill).toHaveBeenCalledWith("SIGTERM");
+		expect(watcher.stdout.listenerCount("data")).toBe(0);
+		expect(watcher.stderr.listenerCount("data")).toBe(0);
+		expect(watcher.listenerCount("error")).toBe(0);
+		expect(watcher.listenerCount("exit")).toBe(0);
+		expect(loggerMocks.error).not.toHaveBeenCalled();
 		watcher.killed = true;
 		cleanup();
 		expect(watcher.kill).toHaveBeenCalledOnce();
+	});
+
+	it("rejects watcher startup errors with bounded stderr context", async () => {
+		const watcher = createWatcher();
+		childProcessMocks.spawn.mockReturnValue(watcher);
+
+		const subscription = audioOutputApi.subscribeDefaultDeviceChanges(vi.fn());
+		watcher.stderr.emit("data", Buffer.from("x".repeat(10_000)));
+		watcher.emit("error", new Error("ENOENT"));
+
+		await expect(subscription).rejects.toThrow(/ENOENT.*x{1,4096}$/su);
+	});
+
+	it("rejects an early exit and logs an unexpected exit after ready", async () => {
+		const earlyWatcher = createWatcher();
+		childProcessMocks.spawn.mockReturnValueOnce(earlyWatcher);
+		const earlySubscription = audioOutputApi.subscribeDefaultDeviceChanges(vi.fn());
+		earlyWatcher.stderr.emit("data", Buffer.from("startup failed"));
+		earlyWatcher.emit("exit", 2, null);
+		await expect(earlySubscription).rejects.toThrow(/exited before ready.*startup failed/su);
+
+		const readyWatcher = createWatcher();
+		childProcessMocks.spawn.mockReturnValueOnce(readyWatcher);
+		const readySubscription = audioOutputApi.subscribeDefaultDeviceChanges(vi.fn());
+		readyWatcher.stdout.emit("data", Buffer.from("ready\n"));
+		await readySubscription;
+		readyWatcher.emit("exit", 3, null);
+		expect(loggerMocks.error).toHaveBeenCalledWith(expect.stringContaining("exited unexpectedly"));
 	});
 });

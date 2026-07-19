@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 
 import type { AudioDeviceApi } from "./contracts";
 import { type NativeCommand, nativePluginRoots, resolveNativeCommand } from "./native-command";
+import { bindNativeWatcher } from "./native-watcher";
 import type { AudioDevice } from "./types";
 
 type AudioScope = "output" | "input";
@@ -34,19 +35,13 @@ function createWindowsAudioDeviceApi(scope: AudioScope): AudioDeviceApi {
 				windowsHide: true,
 			});
 
-			bindWatcherOutput(watcher, listener);
-
-			return () => {
-				if (!watcher.killed) {
-					watcher.kill();
-				}
-			};
+			return bindNativeWatcher(watcher, "Windows audio", listener);
 		},
 	};
 }
 
 /**
- * Executes the PowerShell/C# bridge and parses its JSON response.
+ * Executes the compiled Windows audio bridge and parses its JSON response.
  */
 async function runWindowsBridge(scope: AudioScope, action: BridgeAction, deviceId?: string): Promise<BridgeResponse> {
 	const nativeCommand = getNativeCommand();
@@ -71,35 +66,6 @@ async function runWindowsBridge(scope: AudioScope, action: BridgeAction, deviceI
 
 function getNativeCommand(): NativeCommand {
 	return resolveNativeCommand("win32", nativePluginRoots(import.meta.url));
-}
-
-/**
- * Binds stdout/stderr handlers to a watcher process and emits listener calls
- * for normalized `changed` messages.
- */
-function bindWatcherOutput(watcher: ReturnType<typeof spawn>, listener: () => void): void {
-	let buffer = "";
-	if (!watcher.stdout) {
-		return;
-	}
-
-	watcher.stdout.on("data", (chunk: Buffer) => {
-		buffer += chunk.toString("utf8");
-
-		let newlineIndex = buffer.indexOf("\n");
-		while (newlineIndex >= 0) {
-			const line = buffer.slice(0, newlineIndex).trim();
-			buffer = buffer.slice(newlineIndex + 1);
-
-			if (line === "changed") {
-				listener();
-			}
-
-			newlineIndex = buffer.indexOf("\n");
-		}
-	});
-
-	watcher.stderr?.on("data", () => {});
 }
 
 /**
@@ -135,7 +101,7 @@ function parseBridgeResponse(stdout: string): BridgeResponse {
 }
 
 /**
- * Raw bridge response shape emitted by the PowerShell bridge.
+ * Raw bridge response shape emitted by the Windows audio bridge.
  */
 interface BridgeResponse {
 	devices: AudioDevice[];

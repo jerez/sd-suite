@@ -117,3 +117,6 @@ jobs:
 
       - name: Test native bridge
         run: pnpm --filter audio-source native:test
+
+      - name: Smoke test Windows audio integration
+        run: pnpm --filter audio-source native:test:integration

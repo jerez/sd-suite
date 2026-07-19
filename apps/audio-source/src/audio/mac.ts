@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 
 import type { AudioDeviceApi } from "./contracts";
 import { type NativeCommand, nativePluginRoots, resolveNativeCommand } from "./native-command";
+import { bindNativeWatcher } from "./native-watcher";
 import type { AudioDevice } from "./types";
 
 type AudioScope = "output" | "input";
@@ -33,19 +34,13 @@ function createMacAudioDeviceApi(scope: AudioScope): AudioDeviceApi {
 				stdio: ["ignore", "pipe", "pipe"],
 			});
 
-			bindWatcherOutput(watcher, listener);
-
-			return () => {
-				if (!watcher.killed) {
-					watcher.kill("SIGTERM");
-				}
-			};
+			return bindNativeWatcher(watcher, "CoreAudio", listener, "SIGTERM");
 		},
 	};
 }
 
 /**
- * Executes the Swift bridge script and parses its JSON response.
+ * Executes the compiled CoreAudio bridge and parses its JSON response.
  */
 async function runSwiftBridge(scope: AudioScope, action: BridgeAction, deviceId?: string): Promise<BridgeResponse> {
 	const nativeCommand = getNativeCommand();
@@ -105,7 +100,7 @@ function parseBridgeResponse(stdout: string): BridgeResponse {
 }
 
 /**
- * Raw bridge response shape emitted by the Swift script.
+ * Raw bridge response shape emitted by the CoreAudio bridge.
  */
 interface BridgeResponse {
 	devices: AudioDevice[];
@@ -117,32 +112,3 @@ interface BridgeResponse {
  */
 export const audioOutputApi: AudioDeviceApi = createMacAudioDeviceApi("output");
 export const audioInputApi: AudioDeviceApi = createMacAudioDeviceApi("input");
-
-/**
- * Binds stdout/stderr handlers to a watcher process and emits listener calls
- * for normalized `changed` messages.
- */
-function bindWatcherOutput(watcher: ReturnType<typeof spawn>, listener: () => void): void {
-	let buffer = "";
-	if (!watcher.stdout) {
-		return;
-	}
-
-	watcher.stdout.on("data", (chunk: Buffer) => {
-		buffer += chunk.toString("utf8");
-
-		let newlineIndex = buffer.indexOf("\n");
-		while (newlineIndex >= 0) {
-			const line = buffer.slice(0, newlineIndex).trim();
-			buffer = buffer.slice(newlineIndex + 1);
-
-			if (line === "changed") {
-				listener();
-			}
-
-			newlineIndex = buffer.indexOf("\n");
-		}
-	});
-
-	watcher.stderr?.on("data", () => {});
-}
