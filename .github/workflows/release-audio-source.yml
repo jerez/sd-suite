@@ -1,0 +1,158 @@
+name: Release Audio Source
+
+on:
+  push:
+    tags:
+      - "audio-source-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  native-macos:
+    name: Native bridge (macOS)
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+          standalone: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build universal native bridge
+        run: pnpm --filter audio-source native:build:release
+
+      - name: Validate universal native bridge
+        run: pnpm --filter audio-source native:validate:release
+
+      - name: Test native bridge
+        run: pnpm --filter audio-source native:test
+
+      - name: Upload macOS native bridge
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-source-native-macos
+          path: apps/audio-source/.native/macos/audio-bridge
+          if-no-files-found: error
+          retention-days: 1
+
+  native-windows:
+    name: Native bridge (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+          standalone: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build native bridge
+        run: pnpm --filter audio-source native:build
+
+      - name: Validate native bridge
+        run: pnpm --filter audio-source native:validate
+
+      - name: Test native bridge
+        run: pnpm --filter audio-source native:test
+
+      - name: Upload Windows native bridge
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-source-native-windows
+          path: apps/audio-source/.native/windows/audio-bridge.exe
+          if-no-files-found: error
+          retention-days: 1
+
+  assemble:
+    name: Assemble and publish plugin
+    needs:
+      - native-macos
+      - native-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+          standalone: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download macOS native bridge
+        uses: actions/download-artifact@v5
+        with:
+          name: audio-source-native-macos
+          path: apps/audio-source/.native/macos
+
+      - name: Download Windows native bridge
+        uses: actions/download-artifact@v5
+        with:
+          name: audio-source-native-windows
+          path: apps/audio-source/.native/windows
+
+      - name: Restore macOS executable permissions
+        run: chmod 755 apps/audio-source/.native/macos/audio-bridge
+
+      - name: Stage native bridges
+        run: pnpm --filter audio-source native:stage
+
+      - name: Pack plugin
+        run: pnpm --filter audio-source run pack
+
+      - name: Upload assembled plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-source-streamdeck-plugin
+          path: apps/audio-source/dev.jerez.sds.audio-source.streamDeckPlugin
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME"
+          apps/audio-source/dev.jerez.sds.audio-source.streamDeckPlugin
+          --repo "$GITHUB_REPOSITORY"
+          --verify-tag
+          --generate-notes
+          --title "Audio Source ${GITHUB_REF_NAME#audio-source-v}"
