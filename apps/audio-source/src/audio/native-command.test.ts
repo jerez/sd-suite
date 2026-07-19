@@ -47,6 +47,18 @@ describe("native command resolution", () => {
 		});
 	});
 
+	it("selects the first compiled bridge across multiple roots", () => {
+		const firstRoot = createRoot();
+		const secondRoot = createRoot();
+		const firstExecutable = createFile(firstRoot, "native/macos/audio-bridge");
+		createFile(secondRoot, "native/macos/audio-bridge");
+
+		expect(resolveNativeCommand("darwin", [firstRoot, secondRoot])).toEqual({
+			executable: firstExecutable,
+			prefixArgs: [],
+		});
+	});
+
 	it("uses the staged macOS source only with an explicit development marker", () => {
 		const developmentRoot = createRoot();
 		createFile(developmentRoot, "native/.development-mode", "darwin\n");
@@ -69,6 +81,49 @@ describe("native command resolution", () => {
 		});
 	});
 
+	it("gives an explicit development marker precedence over compiled bridges in earlier roots", () => {
+		const compiledRoot = createRoot();
+		const developmentRoot = createRoot();
+		createFile(compiledRoot, "native/macos/audio-bridge");
+		createFile(developmentRoot, "native/.development-mode", "darwin\n");
+		const source = createFile(developmentRoot, "native/macos/main.swift");
+
+		expect(resolveNativeCommand("darwin", [compiledRoot, developmentRoot])).toEqual({
+			executable: "/usr/bin/swift",
+			prefixArgs: [source],
+		});
+	});
+
+	it("does not bypass a mismatched development marker using a later root", () => {
+		const mismatchedRoot = createRoot();
+		const validRoot = createRoot();
+		createFile(mismatchedRoot, "native/.development-mode", "win32\n");
+		createFile(validRoot, "native/.development-mode", "darwin\n");
+		createFile(validRoot, "native/macos/main.swift");
+
+		expect(() => resolveNativeCommand("darwin", [mismatchedRoot, validRoot])).toThrow(
+			"Native development mode is staged for win32, not darwin.",
+		);
+	});
+
+	it("reports missing staged macOS source", () => {
+		const developmentRoot = createRoot();
+		createFile(developmentRoot, "native/.development-mode", "darwin\n");
+
+		expect(() => resolveNativeCommand("darwin", [developmentRoot])).toThrow(
+			"Staged macOS development bridge source not found.",
+		);
+	});
+
+	it("reports missing staged Windows source", () => {
+		const developmentRoot = createRoot();
+		createFile(developmentRoot, "native/.development-mode", "win32\n");
+
+		expect(() => resolveNativeCommand("win32", [developmentRoot])).toThrow(
+			"Staged Windows development bridge source not found.",
+		);
+	});
+
 	it("does not implicitly fall back to staged macOS source", () => {
 		const emptyRoot = createRoot();
 		createFile(emptyRoot, "native/macos/main.swift");
@@ -78,6 +133,7 @@ describe("native command resolution", () => {
 
 	it("reports a missing compiled Windows bridge", () => {
 		const emptyRoot = createRoot();
+		createFile(emptyRoot, "native/windows/audio-bridge.ps1");
 
 		expect(() => resolveNativeCommand("win32", [emptyRoot])).toThrow("Compiled Windows audio bridge not found.");
 	});
@@ -93,7 +149,18 @@ describe("native command resolution", () => {
 });
 
 describe("native plugin roots", () => {
-	it("returns the packaged root, workspace plugin root, and cwd without duplicates", () => {
+	it("returns the packaged root, workspace plugin root, and cwd in order", () => {
+		const cwd = path.join(path.sep, "workspace", "apps", "audio-source");
+		const moduleUrl = new URL("file:///installed/plugin/bin/plugin.js").href;
+
+		expect(nativePluginRoots(moduleUrl, cwd)).toEqual([
+			path.join(path.sep, "installed", "plugin"),
+			path.join(cwd, "dev.jerez.sds.audio-source.sdPlugin"),
+			cwd,
+		]);
+	});
+
+	it("deduplicates overlapping packaged and workspace roots", () => {
 		const cwd = path.join(path.sep, "workspace", "apps", "audio-source");
 		const moduleUrl = new URL("file:///workspace/apps/audio-source/dev.jerez.sds.audio-source.sdPlugin/bin/plugin.js")
 			.href;
