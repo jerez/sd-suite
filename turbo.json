@@ -13,6 +13,22 @@
             "dependsOn": ["^lint"],
             "outputs": []
         },
+        "native:build": {
+            "cache": false,
+            "outputs": [".native/**"]
+        },
+        "native:stage": {
+            "cache": false,
+            "outputs": []
+        },
+        "native:test": {
+            "cache": false,
+            "outputs": []
+        },
+        "native:validate": {
+            "cache": false,
+            "outputs": []
+        },
         "validate": {
             "dependsOn": ["build"],
             "outputs": []
