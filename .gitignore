@@ -30,6 +30,11 @@ pnpm-debug.log*
 *.sdPlugin/bin/*.map
 logs/
 
+# Audio Source native build and staging output
+/apps/audio-source/.native/
+/apps/audio-source/native/macos/.build/
+/apps/audio-source/dev.jerez.sds.audio-source.sdPlugin/native/
+
 # Local env/config
 .env
 .env.*
