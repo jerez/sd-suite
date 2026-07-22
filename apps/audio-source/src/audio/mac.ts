@@ -1,21 +1,15 @@
 import { execFile, spawn } from "node:child_process";
-import { existsSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import type { AudioDeviceApi } from "./contracts";
+import { type NativeCommand, nativePluginRoots, resolveNativeCommand } from "./native-command";
+import { bindNativeWatcher } from "./native-watcher";
 import type { AudioDevice } from "./types";
 
 type AudioScope = "output" | "input";
 type BridgeAction = "query" | "set";
 
 const execFileAsync = promisify(execFile);
-
-const NATIVE_SWIFT_RELATIVE_PATH = path.join("native", "mac", "audio-bridge.swift");
-const PROJECT_NATIVE_SWIFT_RELATIVE_PATH = path.join("dev.jerez.sds.audio-source.sdPlugin", NATIVE_SWIFT_RELATIVE_PATH);
-
-const swiftBridgePath = resolveNativeSwiftBridgePath();
 
 function createMacAudioDeviceApi(scope: AudioScope): AudioDeviceApi {
 	return {
@@ -35,33 +29,30 @@ function createMacAudioDeviceApi(scope: AudioScope): AudioDeviceApi {
 			await runSwiftBridge(scope, "set", deviceId);
 		},
 		subscribeDefaultDeviceChanges: async (listener: () => void) => {
-			const watcher = spawn("/usr/bin/swift", [swiftBridgePath, "watch", scope], {
+			const nativeCommand = getNativeCommand();
+			const watcher = spawn(nativeCommand.executable, [...nativeCommand.prefixArgs, "watch", scope], {
 				stdio: ["ignore", "pipe", "pipe"],
 			});
 
-			bindWatcherOutput(watcher, listener);
-
-			return () => {
-				if (!watcher.killed) {
-					watcher.kill("SIGTERM");
-				}
-			};
+			return bindNativeWatcher(watcher, "CoreAudio", listener, "SIGTERM");
 		},
 	};
 }
 
 /**
- * Executes the Swift bridge script and parses its JSON response.
+ * Executes the compiled CoreAudio bridge and parses its JSON response.
  */
 async function runSwiftBridge(scope: AudioScope, action: BridgeAction, deviceId?: string): Promise<BridgeResponse> {
-	const args = [swiftBridgePath, action, scope];
+	const nativeCommand = getNativeCommand();
+	const args = [...nativeCommand.prefixArgs, action, scope];
 	if (deviceId) {
 		args.push(deviceId);
 	}
 
-	const { stdout } = await execFileAsync("/usr/bin/swift", args, {
+	const { stdout } = await execFileAsync(nativeCommand.executable, args, {
 		timeout: 15_000,
 		maxBuffer: 2 * 1024 * 1024,
+		windowsHide: process.platform === "win32",
 	});
 
 	const text = stdout.trim();
@@ -72,24 +63,8 @@ async function runSwiftBridge(scope: AudioScope, action: BridgeAction, deviceId?
 	return parseBridgeResponse(text);
 }
 
-/**
- * Resolves the Swift bridge location from packaged-plugin and workspace layouts.
- */
-function resolveNativeSwiftBridgePath(): string {
-	const moduleDir = path.dirname(fileURLToPath(import.meta.url));
-	const candidates = [
-		path.resolve(moduleDir, "..", NATIVE_SWIFT_RELATIVE_PATH),
-		path.resolve(process.cwd(), NATIVE_SWIFT_RELATIVE_PATH),
-		path.resolve(process.cwd(), PROJECT_NATIVE_SWIFT_RELATIVE_PATH),
-	];
-
-	for (const candidate of candidates) {
-		if (existsSync(candidate)) {
-			return candidate;
-		}
-	}
-
-	throw new Error(`Swift native bridge file not found. Tried: ${candidates.join(", ")}`);
+function getNativeCommand(): NativeCommand {
+	return resolveNativeCommand("darwin", nativePluginRoots(import.meta.url));
 }
 
 /**
@@ -125,7 +100,7 @@ function parseBridgeResponse(stdout: string): BridgeResponse {
 }
 
 /**
- * Raw bridge response shape emitted by the Swift script.
+ * Raw bridge response shape emitted by the CoreAudio bridge.
  */
 interface BridgeResponse {
 	devices: AudioDevice[];
@@ -137,32 +112,3 @@ interface BridgeResponse {
  */
 export const audioOutputApi: AudioDeviceApi = createMacAudioDeviceApi("output");
 export const audioInputApi: AudioDeviceApi = createMacAudioDeviceApi("input");
-
-/**
- * Binds stdout/stderr handlers to a watcher process and emits listener calls
- * for normalized `changed` messages.
- */
-function bindWatcherOutput(watcher: ReturnType<typeof spawn>, listener: () => void): void {
-	let buffer = "";
-	if (!watcher.stdout) {
-		return;
-	}
-
-	watcher.stdout.on("data", (chunk: Buffer) => {
-		buffer += chunk.toString("utf8");
-
-		let newlineIndex = buffer.indexOf("\n");
-		while (newlineIndex >= 0) {
-			const line = buffer.slice(0, newlineIndex).trim();
-			buffer = buffer.slice(newlineIndex + 1);
-
-			if (line === "changed") {
-				listener();
-			}
-
-			newlineIndex = buffer.indexOf("\n");
-		}
-	});
-
-	watcher.stderr?.on("data", () => {});
-}

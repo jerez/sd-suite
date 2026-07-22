@@ -5,6 +5,9 @@ export default defineConfig({
 		environment: "node",
 		exclude: ["**/node_modules/**", "**/dist/**", "**/coverage/**", "**/*.sdPlugin/**"],
 		fileParallelism: false,
-		include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+		include: [
+			"src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+			"scripts/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+		],
 	},
 });

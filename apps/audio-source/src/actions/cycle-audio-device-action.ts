@@ -362,6 +362,11 @@ export abstract class CycleAudioDeviceAction extends SingletonAction<ActionSetti
 			this.scheduleDefaultChangeSync();
 		})
 			.then((stop) => {
+				if (this.dialActionsById.size === 0) {
+					stop();
+					return;
+				}
+
 				this.stopDefaultChangeSubscription = stop;
 			})
 			.catch((error) => {

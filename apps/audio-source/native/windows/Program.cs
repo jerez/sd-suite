@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Web.Script.Serialization;
 
 /// <summary>
 /// WASAPI audio flow selector.
@@ -65,29 +67,39 @@ public struct PROPVARIANT {
 [Guid("A95664D2-9614-4F35-A746-DE8DB63617E6")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IMMDeviceEnumerator {
-    int NotImpl1();
-    int GetDefaultAudioEndpoint(EDataFlow dataFlow, ERole role, out IMMDevice endpoint);
-    int NotImpl2();
-    int NotImpl3();
-    int NotImpl4();
+    [PreserveSig]
     int EnumAudioEndpoints(EDataFlow dataFlow, DEVICE_STATE stateMask, out IMMDeviceCollection devices);
+    [PreserveSig]
+    int GetDefaultAudioEndpoint(EDataFlow dataFlow, ERole role, out IMMDevice endpoint);
+    [PreserveSig]
+    int GetDevice([MarshalAs(UnmanagedType.LPWStr)] string deviceId, out IMMDevice device);
+    [PreserveSig]
+    int RegisterEndpointNotificationCallback(IMMNotificationClient client);
+    [PreserveSig]
+    int UnregisterEndpointNotificationCallback(IMMNotificationClient client);
 }
 
 [ComImport]
 [Guid("D666063F-1587-4E43-81F1-B948E807363F")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IMMDevice {
+    [PreserveSig]
     int Activate(ref Guid iid, int clsCtx, IntPtr activationParams, out IntPtr interfacePointer);
+    [PreserveSig]
     int OpenPropertyStore(int stgmAccess, out IPropertyStore properties);
+    [PreserveSig]
     int GetId([MarshalAs(UnmanagedType.LPWStr)] out string id);
+    [PreserveSig]
     int GetState(out DEVICE_STATE state);
 }
 
 [ComImport]
-[Guid("0BD7A1BE-7A1A-44DB-8397-C0A1461CDBA0")]
+[Guid("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IMMDeviceCollection {
+    [PreserveSig]
     int GetCount(out uint count);
+    [PreserveSig]
     int Item(uint item, out IMMDevice device);
 }
 
@@ -95,23 +107,41 @@ public interface IMMDeviceCollection {
 [Guid("5CDF2C82-841E-4546-9722-0CF74078229A")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IAudioEndpointVolume {
+    [PreserveSig]
     int RegisterControlChangeNotify(IntPtr notify);
+    [PreserveSig]
     int UnregisterControlChangeNotify(IntPtr notify);
+    [PreserveSig]
     int GetChannelCount(out uint channelCount);
+    [PreserveSig]
     int SetMasterVolumeLevel(float levelDB, Guid eventContext);
+    [PreserveSig]
     int SetMasterVolumeLevelScalar(float level, Guid eventContext);
+    [PreserveSig]
     int GetMasterVolumeLevel(out float levelDB);
+    [PreserveSig]
     int GetMasterVolumeLevelScalar(out float level);
+    [PreserveSig]
     int SetChannelVolumeLevel(uint channelNumber, float levelDB, Guid eventContext);
+    [PreserveSig]
     int SetChannelVolumeLevelScalar(uint channelNumber, float level, Guid eventContext);
+    [PreserveSig]
     int GetChannelVolumeLevel(uint channelNumber, out float levelDB);
+    [PreserveSig]
     int GetChannelVolumeLevelScalar(uint channelNumber, out float level);
+    [PreserveSig]
     int SetMute([MarshalAs(UnmanagedType.Bool)] bool isMuted, Guid eventContext);
+    [PreserveSig]
     int GetMute([MarshalAs(UnmanagedType.Bool)] out bool isMuted);
+    [PreserveSig]
     int GetVolumeStepInfo(out uint step, out uint stepCount);
+    [PreserveSig]
     int VolumeStepUp(Guid eventContext);
+    [PreserveSig]
     int VolumeStepDown(Guid eventContext);
+    [PreserveSig]
     int QueryHardwareSupport(out uint hardwareSupportMask);
+    [PreserveSig]
     int GetVolumeRange(out float volumeMindB, out float volumeMaxdB, out float volumeIncrementdB);
 }
 
@@ -119,10 +149,15 @@ public interface IAudioEndpointVolume {
 [Guid("886d8eeb-8cf2-4446-8d02-cdba1dbdcf99")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IPropertyStore {
+    [PreserveSig]
     int GetCount(out uint propertyCount);
+    [PreserveSig]
     int GetAt(uint propertyIndex, out PROPERTYKEY key);
+    [PreserveSig]
     int GetValue(ref PROPERTYKEY key, out PROPVARIANT value);
+    [PreserveSig]
     int SetValue(ref PROPERTYKEY key, ref PROPVARIANT value);
+    [PreserveSig]
     int Commit();
 }
 
@@ -130,22 +165,16 @@ public interface IPropertyStore {
 [Guid("7991EEC9-7E89-4D85-8390-6C703CEC60C0")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IMMNotificationClient {
+    [PreserveSig]
     int OnDeviceStateChanged([MarshalAs(UnmanagedType.LPWStr)] string deviceId, DEVICE_STATE newState);
+    [PreserveSig]
     int OnDeviceAdded([MarshalAs(UnmanagedType.LPWStr)] string deviceId);
+    [PreserveSig]
     int OnDeviceRemoved([MarshalAs(UnmanagedType.LPWStr)] string deviceId);
+    [PreserveSig]
     int OnDefaultDeviceChanged(EDataFlow flow, ERole role, [MarshalAs(UnmanagedType.LPWStr)] string defaultDeviceId);
+    [PreserveSig]
     int OnPropertyValueChanged([MarshalAs(UnmanagedType.LPWStr)] string deviceId, PROPERTYKEY key);
-}
-
-[ComImport]
-[Guid("A95664D2-9614-4F35-A746-DE8DB63617E6")]
-[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-public interface IMMDeviceEnumeratorNotification {
-    int EnumAudioEndpoints(EDataFlow dataFlow, DEVICE_STATE stateMask, out IMMDeviceCollection devices);
-    int GetDefaultAudioEndpoint(EDataFlow dataFlow, ERole role, out IMMDevice endpoint);
-    int GetDevice([MarshalAs(UnmanagedType.LPWStr)] string deviceId, out IMMDevice device);
-    int RegisterEndpointNotificationCallback(IMMNotificationClient client);
-    int UnregisterEndpointNotificationCallback(IMMNotificationClient client);
 }
 
 [ComImport]
@@ -161,17 +190,28 @@ public class CPolicyConfigClient {
 [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [Guid("F8679F50-850A-41CF-9C72-430F290290C8")]
 public interface IPolicyConfig {
+    [PreserveSig]
     int NotImpl1();
+    [PreserveSig]
     int NotImpl2();
+    [PreserveSig]
     int NotImpl3();
+    [PreserveSig]
     int NotImpl4();
+    [PreserveSig]
     int NotImpl5();
+    [PreserveSig]
     int NotImpl6();
+    [PreserveSig]
     int NotImpl7();
+    [PreserveSig]
     int NotImpl8();
+    [PreserveSig]
     int NotImpl9();
-    int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, ERole role);
+    [PreserveSig]
     int NotImpl10();
+    [PreserveSig]
+    int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, ERole role);
 }
 
 /// <summary>
@@ -229,6 +269,67 @@ public sealed class DefaultDeviceNotificationClient : IMMNotificationClient {
     public int OnPropertyValueChanged(string deviceId, PROPERTYKEY key) {
         onAnyDevicePropertyChanged();
         return 0;
+    }
+}
+
+/// <summary>
+/// Verifies the managed COM declarations used by the bridge before native calls.
+/// </summary>
+public static class InteropContractValidator {
+    private static readonly Type[] HResultInterfaces = {
+        typeof(IMMDeviceEnumerator),
+        typeof(IMMDevice),
+        typeof(IMMDeviceCollection),
+        typeof(IAudioEndpointVolume),
+        typeof(IPropertyStore),
+        typeof(IMMNotificationClient),
+        typeof(IPolicyConfig)
+    };
+
+    public static void Validate() {
+        ValidateMethodOrder(
+            typeof(IMMDeviceEnumerator),
+            "EnumAudioEndpoints",
+            "GetDefaultAudioEndpoint",
+            "GetDevice",
+            "RegisterEndpointNotificationCallback",
+            "UnregisterEndpointNotificationCallback"
+        );
+
+        MethodInfo[] policyMethods = GetMethodsInMetadataOrder(typeof(IPolicyConfig));
+        if (policyMethods.Length <= 10 || policyMethods[10].Name != "SetDefaultEndpoint") {
+            throw new InvalidOperationException("IPolicyConfig.SetDefaultEndpoint must occupy vtable slot 10.");
+        }
+
+        foreach (Type interfaceType in HResultInterfaces) {
+            foreach (MethodInfo method in interfaceType.GetMethods()) {
+                MethodImplAttributes flags = method.GetMethodImplementationFlags();
+                if ((flags & MethodImplAttributes.PreserveSig) == 0) {
+                    throw new InvalidOperationException(
+                        interfaceType.Name + "." + method.Name + " must preserve its HRESULT signature."
+                    );
+                }
+            }
+        }
+    }
+
+    private static void ValidateMethodOrder(Type interfaceType, params string[] expectedNames) {
+        MethodInfo[] methods = GetMethodsInMetadataOrder(interfaceType);
+        if (methods.Length != expectedNames.Length) {
+            throw new InvalidOperationException(interfaceType.Name + " has an unexpected method count.");
+        }
+
+        for (int index = 0; index < expectedNames.Length; index++) {
+            if (methods[index].Name != expectedNames[index]) {
+                throw new InvalidOperationException(interfaceType.Name + " has an invalid COM vtable order.");
+            }
+        }
+    }
+
+    private static MethodInfo[] GetMethodsInMetadataOrder(Type interfaceType) {
+        MethodInfo[] methods = interfaceType.GetMethods();
+        Array.Sort(methods, (left, right) => left.MetadataToken.CompareTo(right.MetadataToken));
+        return methods;
     }
 }
 
@@ -377,7 +478,7 @@ public static class AudioEndpointBridge {
     /// `ready` once started, then `changed` on relevant updates.
     /// </summary>
     public static void Watch(EDataFlow watchedFlow) {
-        var enumerator = (IMMDeviceEnumeratorNotification)new MMDeviceEnumeratorComObject();
+        var enumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorComObject();
         var notificationClient = new DefaultDeviceNotificationClient(
             (flow, role, defaultDeviceId) => {
                 if (flow == watchedFlow) {
@@ -435,7 +536,8 @@ public static class AudioEndpointBridge {
     /// </summary>
     private static string GetDeviceFormFactor(IPropertyStore propertyStore) {
         PROPVARIANT value;
-        int hr = propertyStore.GetValue(ref PKEY_AudioEndpoint_FormFactor, out value);
+        PROPERTYKEY key = PKEY_AudioEndpoint_FormFactor;
+        int hr = propertyStore.GetValue(ref key, out value);
 
         if (hr < 0) {
             return "unknown";
@@ -481,6 +583,61 @@ public static class AudioEndpointBridge {
             if (endpointVolumePtr != IntPtr.Zero) {
                 Marshal.Release(endpointVolumePtr);
             }
+        }
+    }
+}
+
+public static class Program {
+    [STAThread]
+    public static int Main(string[] args) {
+        try {
+            string action = args.Length > 0 ? args[0] : "query";
+            EDataFlow flow = args.Length > 1 && args[1] == "input"
+                ? EDataFlow.eCapture
+                : EDataFlow.eRender;
+
+            if (action == "watch") {
+                AudioEndpointBridge.Watch(flow);
+                return 0;
+            }
+
+            AudioQueryResult result;
+            if (action == "self-test") {
+                InteropContractValidator.Validate();
+                result = new AudioQueryResult {
+                    devices = new[] {
+                        new AudioDeviceInfo {
+                            id = "self-test",
+                            name = "Audio Bridge Self Test",
+                            formFactor = "speakers",
+                            transportType = "virtual",
+                            isDisabled = false,
+                            isMuted = false
+                        }
+                    },
+                    defaultId = "self-test"
+                };
+            }
+            else {
+                if (action == "set") {
+                    if (args.Length < 3 || string.IsNullOrWhiteSpace(args[2])) {
+                        throw new ArgumentException("Device id is required for set action.");
+                    }
+                    AudioEndpointBridge.SetDefault(args[2]);
+                }
+                else if (action != "query") {
+                    throw new ArgumentException("Unknown Windows audio bridge action.");
+                }
+
+                result = AudioEndpointBridge.Query(flow);
+            }
+
+            Console.WriteLine(new JavaScriptSerializer().Serialize(result));
+            return 0;
+        }
+        catch (Exception error) {
+            Console.Error.WriteLine(error.Message);
+            return 1;
         }
     }
 }

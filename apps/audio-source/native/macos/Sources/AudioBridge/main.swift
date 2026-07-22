@@ -118,15 +118,15 @@ func deviceName(_ deviceId: AudioObjectID, scope: AudioScope) -> String {
         mElement: kAudioObjectPropertyElementMain
     )
 
-    var nameRef: CFString = "" as CFString
-    var propertySize = UInt32(MemoryLayout<CFString>.size)
-
+    var nameRef: Unmanaged<CFString>?
+    var propertySize = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
     let status = AudioObjectGetPropertyData(deviceId, &address, 0, nil, &propertySize, &nameRef)
-    guard status == noErr else {
+
+    guard status == noErr, let nameRef else {
         return scope.unknownName
     }
 
-    return nameRef as String
+    return nameRef.takeUnretainedValue() as String
 }
 
 /// Maps CoreAudio transport constants into normalized string values.
@@ -310,19 +310,19 @@ func watch(scope: AudioScope) throws {
     var muteListenerAdded = false
 
     let queue = DispatchQueue(label: scope.watchQueueLabel)
-    
+
     func emitChange() {
         print("changed")
         fflush(stdout)
     }
-    
+
     func addMuteListener(deviceId: AudioObjectID) {
         var muteAddress = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyMute,
             mScope: scope.streamScope,
             mElement: kAudioObjectPropertyElementMain
         )
-        
+
         let muteStatus = AudioObjectAddPropertyListenerBlock(
             deviceId,
             &muteAddress,
@@ -330,21 +330,21 @@ func watch(scope: AudioScope) throws {
         ) { _, _ in
             emitChange()
         }
-        
+
         if muteStatus == noErr {
             muteListenerAdded = true
         }
     }
-    
+
     func removeMuteListener(deviceId: AudioObjectID) {
         guard muteListenerAdded else { return }
-        
+
         var muteAddress = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyMute,
             mScope: scope.streamScope,
             mElement: kAudioObjectPropertyElementMain
         )
-        
+
         AudioObjectRemovePropertyListenerBlock(
             deviceId,
             &muteAddress,
@@ -352,10 +352,10 @@ func watch(scope: AudioScope) throws {
         ) { _, _ in
             emitChange()
         }
-        
+
         muteListenerAdded = false
     }
-    
+
     if let deviceId = currentDefaultDeviceId {
         addMuteListener(deviceId: deviceId)
     }
@@ -366,15 +366,15 @@ func watch(scope: AudioScope) throws {
         queue
     ) { _, _ in
         let newDefaultDeviceId = defaultDeviceId(scope: scope)
-        
+
         if let oldDeviceId = currentDefaultDeviceId {
             removeMuteListener(deviceId: oldDeviceId)
         }
-        
+
         if let newDeviceId = newDefaultDeviceId {
             addMuteListener(deviceId: newDeviceId)
         }
-        
+
         currentDefaultDeviceId = newDefaultDeviceId
         emitChange()
     }
@@ -389,6 +389,7 @@ func watch(scope: AudioScope) throws {
 }
 
 /// Entry point contract:
+/// - self-test <scope>
 /// - query <scope>
 /// - set <scope> <deviceId>
 /// - watch <scope>
@@ -398,6 +399,22 @@ do {
     let scope = AudioScope(scopeRaw)
 
     switch action {
+    case "self-test":
+        try emitJson(
+            AudioState(
+                devices: [
+                    AudioDevice(
+                        id: "self-test",
+                        name: "Audio Bridge Self Test",
+                        formFactor: "speakers",
+                        transportType: "virtual",
+                        isDisabled: false,
+                        isMuted: false
+                    )
+                ],
+                defaultId: "self-test"
+            )
+        )
     case "query":
         try emitJson(try queryState(scope: scope))
     case "set":
