@@ -24,29 +24,13 @@ jobs:
           - language: csharp
             build-mode: none
             os: ubuntu-latest
-          - language: swift
-            build-mode: manual
-            os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
-      - if: matrix.language == 'swift'
-        uses: actions/setup-node@v5
-        with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - if: matrix.language == 'swift'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
-      - if: matrix.language == 'swift'
-        run: pnpm install --frozen-lockfile
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-      - if: matrix.language == 'swift'
-        run: pnpm native:build --filter=audio-source
       - uses: github/codeql-action/analyze@v4
         with:
           category: /language:${{ matrix.language }}

@@ -135,13 +135,13 @@ pnpm --filter audio-source native:test
 ```
 
 The root `native:build` Turbo task is the shared current-platform entry point
-used locally, in normal CI, and by CodeQL. These commands write ignored output
-under `.native/`, validate its executable format, and run the compiled
-`self-test output` protocol. On macOS, the local build contains the current
-architecture. The release build is the only command that combines x86_64 and
-arm64 into one executable. The Windows self-test also checks the compiled COM
-metadata used by the bridge, including native method order and preserved
-HRESULT signatures.
+used for explicit local builds and by the release workflow. These commands
+write ignored output under `.native/`, validate its executable format, and run
+the compiled `self-test output` protocol. On macOS, the local build contains the
+current architecture. The release build is the only command that combines
+x86_64 and arm64 into one executable. The Windows self-test also checks the
+compiled COM metadata used by the bridge, including native method order and
+preserved HRESULT signatures.
 
 ## Stage interpreted development mode
 
@@ -169,27 +169,26 @@ pnpm --filter audio-source native:clean
 
 ## CI and CodeQL responsibilities
 
-Normal CI verifies non-draft pull requests and pushes without producing release
-artifacts:
+Normal CI verifies non-draft pull requests and pushes without compiling native
+executables or producing release artifacts:
 
 - The Linux job runs formatting, linting, type checking, tests, and plugin
   validation.
-- The macOS and Windows jobs build, validate, and self-test their current-host
-  native executable. The Windows job also runs non-mutating `query output` and
-  bounded `watch output` startup smoke checks against Windows Core Audio.
-- No normal CI job stages package binaries, uploads native artifacts, creates an
-  installer, or publishes a release.
+- The test suite validates native source and packaging contracts without
+  invoking a native compiler.
+- No normal CI job compiles or stages package binaries, uploads native
+  artifacts, creates an installer, or publishes a release.
 
 The advanced CodeQL workflow analyzes JavaScript/TypeScript and C# without a
-build. Swift analysis uses manual build mode and runs the package's native macOS
-build between CodeQL initialization and analysis. This gives CodeQL a traced
-SwiftPM compilation instead of relying on Swift autobuild discovery.
+build. Swift requires a traced compilation, so its analysis runs only around
+the macOS compilation in the explicit release workflow.
 
 ## Create a cross-platform release
 
-The release workflow is the only supported cross-platform packaging path. Push
-an explicit tag matching `audio-source-v<version>` after the target commit is
-ready for release. For example:
+The release workflow is the only automated workflow that compiles native
+bridges and the only supported cross-platform packaging path. Push an explicit
+tag matching `audio-source-v<version>` after the target commit is ready for
+release. For example:
 
 ```bash
 git tag audio-source-v0.1.0
@@ -198,8 +197,9 @@ git push origin audio-source-v0.1.0
 
 The workflow performs these steps:
 
-1. macOS builds and validates a macOS 12 universal `arm64` and `x86_64`
-   executable with SwiftPM and `lipo`.
+1. macOS initializes CodeQL, builds and validates a macOS 12 universal `arm64`
+   and `x86_64` executable with SwiftPM and `lipo`, then completes Swift
+   analysis against the traced compilation.
 2. Windows builds, validates, self-tests, and smoke-tests the x64 `net472`
    executable without changing the host's default endpoint.
 3. Each platform uploads its compiled bridge as a short-lived workflow

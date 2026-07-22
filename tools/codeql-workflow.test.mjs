@@ -9,27 +9,30 @@ const ciWorkflow = readFileSync(path.join(repositoryRoot, ".github/workflows/ci.
 const releaseWorkflow = readFileSync(path.join(repositoryRoot, ".github/workflows/release-audio-source.yml"), "utf8");
 
 describe("CodeQL workflow", () => {
-	it("prepares the Swift toolchain before tracing the package-local native build", () => {
-		const nodeSetup = workflow.indexOf("uses: actions/setup-node@v5");
-		const pnpmSetup = workflow.indexOf("uses: pnpm/action-setup@v4");
-		const dependencyInstall = workflow.indexOf("run: pnpm install --frozen-lockfile");
-		const codeqlInit = workflow.indexOf("uses: github/codeql-action/init@v4");
-		const nativeBuild = workflow.indexOf("run: pnpm native:build --filter=audio-source");
-
-		expect(nodeSetup).toBeGreaterThan(-1);
-		expect(pnpmSetup).toBeGreaterThan(nodeSetup);
-		expect(dependencyInstall).toBeGreaterThan(pnpmSetup);
-		expect(codeqlInit).toBeGreaterThan(dependencyInstall);
-		expect(nativeBuild).toBeGreaterThan(codeqlInit);
+	it("keeps pull-request analysis buildless", () => {
+		expect(workflow).toContain("language: javascript-typescript");
+		expect(workflow).toContain("language: csharp");
+		expect(workflow.match(/build-mode: none/gu)).toHaveLength(2);
+		expect(workflow).not.toContain("language: swift");
+		expect(workflow).not.toContain("native:build");
 	});
 
-	it("uses the root Turbo task for current-platform native builds", () => {
-		for (const candidate of [workflow, ciWorkflow, releaseWorkflow]) {
-			expect(candidate).not.toMatch(/^\s*run: pnpm --filter audio-source native:build\s*$/mu);
-		}
+	it("keeps native compilation out of normal CI", () => {
+		expect(ciWorkflow).not.toContain("native:build");
+		expect(ciWorkflow).not.toContain("native-macos:");
+		expect(ciWorkflow).not.toContain("native-windows:");
+	});
 
-		expect(workflow).toContain("run: pnpm native:build --filter=audio-source");
-		expect(ciWorkflow.match(/run: pnpm native:build --filter=audio-source/gu)).toHaveLength(2);
+	it("traces Swift compilation in the explicit release workflow", () => {
+		const codeqlInit = releaseWorkflow.indexOf("uses: github/codeql-action/init@v4");
+		const macosBuild = releaseWorkflow.indexOf("run: pnpm --filter audio-source native:build:release");
+		const codeqlAnalyze = releaseWorkflow.indexOf("uses: github/codeql-action/analyze@v4");
+
+		expect(releaseWorkflow).toContain("languages: swift");
+		expect(releaseWorkflow).toContain("build-mode: manual");
+		expect(codeqlInit).toBeGreaterThan(-1);
+		expect(macosBuild).toBeGreaterThan(codeqlInit);
+		expect(codeqlAnalyze).toBeGreaterThan(macosBuild);
 		expect(releaseWorkflow).toContain("run: pnpm native:build --filter=audio-source");
 	});
 });

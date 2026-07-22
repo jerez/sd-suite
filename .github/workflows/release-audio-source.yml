@@ -12,6 +12,9 @@ jobs:
   native-macos:
     name: Native bridge (macOS)
     runs-on: macos-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Check out repository
@@ -32,6 +35,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Initialize Swift CodeQL analysis
+        uses: github/codeql-action/init@v4
+        with:
+          languages: swift
+          build-mode: manual
+
       - name: Build universal native bridge
         run: pnpm --filter audio-source native:build:release
 
@@ -40,6 +49,11 @@ jobs:
 
       - name: Test native bridge
         run: pnpm --filter audio-source native:test
+
+      - name: Analyze Swift
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:swift
 
       - name: Upload macOS native bridge
         uses: actions/upload-artifact@v4
