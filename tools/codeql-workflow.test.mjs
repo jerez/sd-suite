@@ -9,11 +9,6 @@ const ciWorkflow = readFileSync(path.join(repositoryRoot, ".github/workflows/ci.
 const releaseWorkflow = readFileSync(path.join(repositoryRoot, ".github/workflows/release-audio-source.yml"), "utf8");
 
 describe("CodeQL workflow", () => {
-	it("uses Node-based pnpm instead of the standalone executable", () => {
-		expect(workflow).toContain("standalone: false");
-		expect(workflow).not.toContain("standalone: true");
-	});
-
 	it("prepares the Swift toolchain before tracing the package-local native build", () => {
 		const nodeSetup = workflow.indexOf("uses: actions/setup-node@v5");
 		const pnpmSetup = workflow.indexOf("uses: pnpm/action-setup@v4");

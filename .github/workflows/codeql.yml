@@ -34,11 +34,11 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
+          package-manager-cache: false
       - if: matrix.language == 'swift'
         uses: pnpm/action-setup@v4
         with:
           version: 11.5.0
-          standalone: false
       - if: matrix.language == 'swift'
         run: pnpm install --frozen-lockfile
       - uses: github/codeql-action/init@v4

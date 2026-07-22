@@ -16,6 +16,14 @@ function methodNames(name) {
 	return [...interfaceBody(name).matchAll(/\bint\s+(\w+)\s*\(/gu)].map((match) => match[1]);
 }
 
+function interfaceGuid(name) {
+	const match = source.match(
+		new RegExp(`\\[Guid\\("([^"]+)"\\)\\]\\s*\\[InterfaceType\\([^\\]]+\\)\\]\\s*public interface ${name}\\b`, "u"),
+	);
+	if (!match) throw new Error(`Missing ${name} GUID declaration.`);
+	return match[1];
+}
+
 describe("Windows COM interop source contract", () => {
 	it("declares IMMDeviceEnumerator in native vtable order exactly once", () => {
 		expect(source.match(/public interface IMMDeviceEnumerator\b/gu)).toHaveLength(1);
@@ -26,6 +34,10 @@ describe("Windows COM interop source contract", () => {
 			"RegisterEndpointNotificationCallback",
 			"UnregisterEndpointNotificationCallback",
 		]);
+	});
+
+	it("uses the Windows SDK IID for IMMDeviceCollection", () => {
+		expect(interfaceGuid("IMMDeviceCollection")).toBe("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E");
 	});
 
 	it("places SetDefaultEndpoint after ten IPolicyConfig vtable methods", () => {
