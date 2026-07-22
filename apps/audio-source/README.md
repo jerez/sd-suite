@@ -43,8 +43,8 @@ and troubleshooting.
 apps/audio-source/
   native/macos/                         SwiftPM bridge source
   native/windows/                       .NET Framework bridge source
-  .native/                              Ignored local and release build output
-  dev.jerez.sds.audio-source.sdPlugin/  Plugin assets and staged release binaries
+  .native/                              Ignored native build output
+  dev.jerez.sds.audio-source.sdPlugin/  Plugin assets and staged package binaries
   scripts/                              Native build, staging, and package validation
   docs/                                 User, developer, and visual guides
   src/                                  Plugin runtime, platform adapters, and tests
@@ -55,10 +55,10 @@ Installed plugins run `native/macos/audio-bridge` on macOS or
 platform's built-in audio APIs. They do not require a separate audio-device
 utility.
 
-Normal CI has dedicated macOS and Windows jobs that build, validate, and test
-the corresponding bridge. It does not stage binaries, create an installer, or
-upload native artifacts. The explicit Audio Source release workflow builds
-both platforms and assembles the complete cross-platform installer.
+Normal CI validates the workspace without compiling native bridges, staging
+binaries, creating an installer, or uploading artifacts. This package does not
+define GitHub release automation. Its scripts provide explicit native build,
+validation, staging, and packaging commands for release orchestration to call.
 
 ## Maintainer commands
 
@@ -92,7 +92,7 @@ not fall back to interpreted source when a compiled bridge is missing. Run
 `pnpm --filter audio-source native:clean` to remove staged development files.
 
 See the developer guide for the native command protocol, CI boundary, and
-`audio-source-v<version>` release process.
+cross-platform package assembly contract.
 
 ## Maintainer guides
 

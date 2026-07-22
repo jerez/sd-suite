@@ -135,9 +135,9 @@ pnpm --filter audio-source native:test
 ```
 
 The root `native:build` Turbo task is the shared current-platform entry point
-used for explicit local builds and by the release workflow. These commands
-write ignored output under `.native/`, validate its executable format, and run
-the compiled `self-test output` protocol. On macOS, the local build contains the
+used for explicit local builds and package assembly. These commands write
+ignored output under `.native/`, validate its executable format, and run the
+compiled `self-test output` protocol. On macOS, the local build contains the
 current architecture. The release build is the only command that combines
 x86_64 and arm64 into one executable. The Windows self-test also checks the
 compiled COM metadata used by the bridge, including native method order and
@@ -180,36 +180,44 @@ executables or producing release artifacts:
   artifacts, creates an installer, or publishes a release.
 
 The advanced CodeQL workflow analyzes JavaScript/TypeScript and C# without a
-build. Swift requires a traced compilation, so its analysis runs only around
-the macOS compilation in the explicit release workflow.
+build. It does not compile or analyze Swift in pull requests.
 
-## Create a cross-platform release
+## Assemble a cross-platform package
 
-The release workflow is the only automated workflow that compiles native
-bridges and the only supported cross-platform packaging path. Push an explicit
-tag matching `audio-source-v<version>` after the target commit is ready for
-release. For example:
+Package assembly requires native executables compiled on their matching host
+platforms. Place the completed outputs at these ignored package-local paths:
 
-```bash
-git tag audio-source-v0.1.0
-git push origin audio-source-v0.1.0
+```text
+.native/macos/audio-bridge
+.native/windows/audio-bridge.exe
 ```
 
-The workflow performs these steps:
+The macOS executable must be a macOS 12 universal `arm64` and `x86_64` binary.
+Build and validate it on macOS:
 
-1. macOS initializes CodeQL, builds and validates a macOS 12 universal `arm64`
-   and `x86_64` executable with SwiftPM and `lipo`, then completes Swift
-   analysis against the traced compilation.
-2. Windows builds, validates, self-tests, and smoke-tests the x64 `net472`
-   executable without changing the host's default endpoint.
-3. Each platform uploads its compiled bridge as a short-lived workflow
-   artifact.
-4. The assembly job downloads both artifacts, stages them into the `.sdPlugin`,
-   builds the JavaScript backend, and validates the staged and packed output.
-5. The workflow uploads `dev.jerez.sds.audio-source.streamDeckPlugin` and
-   publishes it on the matching GitHub release.
+```bash
+pnpm --filter audio-source native:build:release
+pnpm --filter audio-source native:validate:release
+pnpm --filter audio-source native:test
+```
 
-The installer must contain both compiled paths:
+Build, validate, and exercise the x64 `net472` executable on Windows:
+
+```bash
+pnpm native:build --filter=audio-source
+pnpm --filter audio-source native:validate
+pnpm --filter audio-source native:test
+pnpm --filter audio-source native:test:integration
+```
+
+After both executables are present, stage them and create the installer:
+
+```bash
+pnpm --filter audio-source native:stage
+pnpm --filter audio-source run pack
+```
+
+The installer contains both compiled paths:
 
 ```text
 native/macos/audio-bridge
@@ -228,10 +236,14 @@ A successful archive check ends with:
 Required compiled native package assets are present.
 ```
 
+These package commands do not create tags, upload artifacts, or publish a
+release. Generated native executables and installers remain ignored and must not
+be committed.
+
 ## Manual verification on macOS
 
-1. Install the release workflow's `.streamDeckPlugin` file on macOS 12 or later
-   with Stream Deck 6.9 or later.
+1. Install the assembled `.streamDeckPlugin` file on macOS 12 or later with
+   Stream Deck 6.9 or later.
 2. Add both actions to separate encoder dials.
 3. For each action, rotate in both directions. Confirm that the carousel wraps
    and that the system default has not changed.
@@ -244,9 +256,8 @@ Required compiled native package assets are present.
 
 ## Manual verification on Windows
 
-1. Install the same release workflow's `.streamDeckPlugin` file on 64-bit
-   Windows 10 or later with .NET Framework 4.7.2 or later and Stream Deck 6.9
-   or later.
+1. Install the assembled `.streamDeckPlugin` file on 64-bit Windows 10 or later
+   with .NET Framework 4.7.2 or later and Stream Deck 6.9 or later.
 2. Repeat the rotate, push, touch, external-change, and timeout checks from the
    macOS procedure for both actions.
 3. After pushing, confirm in Windows sound settings that the selected endpoint
