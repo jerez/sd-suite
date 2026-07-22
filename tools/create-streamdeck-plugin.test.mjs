@@ -93,6 +93,7 @@ describe("create-streamdeck-plugin helpers", () => {
 			expect(readme).toContain("Package: `control-mesh`");
 			expect(readme).toContain("Plugin UUID: `dev.jerez.sds.control-mesh`");
 			expect(readme).toContain("Plugin folder: `dev.jerez.sds.control-mesh.sdPlugin`");
+			expect(readme).toContain("Declare shipped changes from the workspace root with `pnpm changeset`.");
 			expect(await readFile(path.join(rootDir, "docs", "control-mesh.md"), "utf8")).toBe("# Control Mesh\n");
 			await expect(readFile(path.join(appDir, "docs", "brief.md"), "utf8")).rejects.toThrow();
 			expect(packageJson).toMatchObject({

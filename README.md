@@ -7,6 +7,7 @@
 - [Project documentation index](./docs/projects.md)
 - [Naming](./docs/naming.md)
 - [Plugin scaffolding](./docs/plugin-scaffolding.md)
+- [Plugin releases](./docs/releases.md)
 - [Visual identity](./docs/visual-identity.md)
 
 Plugin-specific documentation lives with each plugin package. Start with the
@@ -35,6 +36,7 @@ tools/
 - pnpm workspace with Turbo
 - TypeScript, ESLint, Prettier, and Vitest
 - Package-level Stream Deck validation and packaging commands where applicable
+- Changesets for independent plugin versions and reviewed release intent
 
 ## Working With Agents
 
@@ -65,6 +67,10 @@ pnpm plugin:validate
 Pull request titles should follow Conventional Commits, for example
 `fix(control-mesh): handle expired MCP session`. With squash-only merges, the
 PR title is intended to become the final commit message on `main`.
+
+Pull requests that change shipped plugin behavior include a Changeset for each
+affected plugin. See [Plugin releases](./docs/releases.md) for version selection,
+version pull requests, native build ownership, and GitHub Release artifacts.
 
 ## Trademark Notice
 

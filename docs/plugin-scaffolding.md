@@ -13,6 +13,7 @@ pnpm format
 pnpm lint:fix
 pnpm plugin:validate
 pnpm plugin:pack
+pnpm changeset
 ```
 
 - `plugin:create` creates a new plugin package under `apps/<plugin-name>/`.
@@ -24,6 +25,7 @@ pnpm plugin:pack
 - `plugin:validate` builds and validates every plugin package under `apps/`
   through Turbo.
 - `plugin:pack` runs package-level Stream Deck packaging through Turbo.
+- `changeset` records which plugin versions a shipped change should bump.
 
 ## Generator Behavior
 
@@ -43,6 +45,8 @@ For each plugin, it:
 - adapts `package.json` for pnpm workspace scripts and package-local Stream Deck
   commands
 - adapts `tsconfig.json` to extend the root `tsconfig.base.json`
+- makes the package eligible for the generic release planner through its
+  package version and single `.sdPlugin/manifest.json`
 - creates `apps/<plugin-name>/README.md` from scaffold metadata such as package
   name, display name, UUID, `.sdPlugin` folder, SDK version, CLI version, and
   package commands
@@ -126,6 +130,10 @@ Root scripts orchestrate package tasks:
     }
 }
 ```
+
+Generated plugins do not own GitHub workflows. The workspace release workflow
+selects a generated plugin only after a reviewed version pull request increases
+its package version. See [Plugin releases](./releases.md).
 
 After creating a plugin package, run the workspace format and lint fixers before
 checking or committing generated files:

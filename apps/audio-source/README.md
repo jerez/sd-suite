@@ -56,9 +56,10 @@ platform's built-in audio APIs. They do not require a separate audio-device
 utility.
 
 Normal CI validates the workspace without compiling native bridges, staging
-binaries, creating an installer, or uploading artifacts. This package does not
-define GitHub release automation. Its scripts provide explicit native build,
-validation, staging, and packaging commands for release orchestration to call.
+binaries, creating an installer, or uploading artifacts. The workspace release
+workflow calls this package's native build, validation, staging, and packaging
+commands only after a reviewed version pull request changes the Audio Source
+package version.
 
 ## Maintainer commands
 

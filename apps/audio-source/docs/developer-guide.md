@@ -179,6 +179,11 @@ executables or producing release artifacts:
 - No normal CI job compiles or stages package binaries, uploads native
   artifacts, creates an installer, or publishes a release.
 
+Pull requests that change shipped Audio Source behavior include an `audio-source`
+Changeset. A reviewed version pull request synchronizes the package version and
+four-part Stream Deck manifest version. Merging that version pull request causes
+the shared release workflow to select Audio Source.
+
 The advanced CodeQL workflow analyzes JavaScript/TypeScript and C# without a
 build. It does not compile or analyze Swift in pull requests.
 
@@ -193,21 +198,17 @@ platforms. Place the completed outputs at these ignored package-local paths:
 ```
 
 The macOS executable must be a macOS 12 universal `arm64` and `x86_64` binary.
-Build and validate it on macOS:
+The package-owned release task builds and validates it on macOS:
 
 ```bash
-pnpm --filter audio-source native:build:release
-pnpm --filter audio-source native:validate:release
-pnpm --filter audio-source native:test
+pnpm turbo run release:native --filter=audio-source
 ```
 
-Build, validate, and exercise the x64 `net472` executable on Windows:
+The same task builds, validates, and exercises the x64 `net472` executable on
+Windows. It also runs the Windows query and watcher integration smoke test:
 
 ```bash
-pnpm native:build --filter=audio-source
-pnpm --filter audio-source native:validate
-pnpm --filter audio-source native:test
-pnpm --filter audio-source native:test:integration
+pnpm turbo run release:native --filter=audio-source
 ```
 
 After both executables are present, stage them and create the installer:
@@ -236,9 +237,11 @@ A successful archive check ends with:
 Required compiled native package assets are present.
 ```
 
-These package commands do not create tags, upload artifacts, or publish a
-release. Generated native executables and installers remain ignored and must not
-be committed.
+These package commands do not create tags or upload artifacts. The shared
+release workflow transfers `.native/macos/` and `.native/windows/` between jobs,
+runs the staging and packaging tasks, and attaches the installer to the
+`audio-source@<version>` GitHub Release. Generated native executables and
+installers remain ignored and must not be committed.
 
 ## Manual verification on macOS
 

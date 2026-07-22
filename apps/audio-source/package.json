@@ -4,6 +4,12 @@
     "version": "0.1.0",
     "license": "MIT",
     "type": "module",
+    "release": {
+        "nativePlatforms": [
+            "macos",
+            "windows"
+        ]
+    },
     "scripts": {
         "build": "rollup -c",
         "watch": "rollup -c -w --watch.onEnd=\"streamdeck restart dev.jerez.sds.audio-source\"",
@@ -24,6 +30,7 @@
         "native:stage": "node scripts/stage-native.mjs",
         "native:stage:development": "node scripts/stage-native-development.mjs",
         "native:clean": "node scripts/clean-native-staging.mjs",
+        "release:native": "node scripts/release-native.mjs",
         "typecheck": "tsc --noEmit",
         "lint": "eslint . --max-warnings 0",
         "test": "vitest run --passWithNoTests"

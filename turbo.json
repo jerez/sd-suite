@@ -29,6 +29,10 @@
             "cache": false,
             "outputs": []
         },
+        "release:native": {
+            "cache": false,
+            "outputs": [".native/**"]
+        },
         "validate": {
             "dependsOn": ["build"],
             "outputs": []
