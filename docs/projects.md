@@ -16,4 +16,5 @@ truth for plugin behavior, setup, and limits.
 
 - [Naming](./naming.md)
 - [Plugin Scaffolding](./plugin-scaffolding.md)
+- [Plugin Releases](./releases.md)
 - [Visual Identity](./visual-identity.md)
