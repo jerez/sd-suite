@@ -33,7 +33,7 @@
     "devDependencies": {
         "@changesets/cli": "2.31.1",
         "@commitlint/cli": "^21.0.2",
-        "@commitlint/config-conventional": "^21.0.2",
+        "@commitlint/config-conventional": "^21.2.0",
         "@elgato/cli": "1.7.4",
         "@eslint/js": "^10.0.1",
         "@types/node": "~24.12.4",
