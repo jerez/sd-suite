@@ -37,7 +37,7 @@
     },
     "dependencies": {
         "@elgato/streamdeck": "2.1.0",
-        "lucide": "^0.577.0"
+        "lucide": "^1.26.0"
     },
     "devDependencies": {
         "@elgato/cli": "1.7.4",
