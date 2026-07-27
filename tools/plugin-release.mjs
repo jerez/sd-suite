@@ -1,11 +1,12 @@
-import { execFileSync } from "node:child_process";
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const STABLE_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
 const PLUGIN_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const RELEASE_KINDS = new Set(["rc", "stable"]);
+const SHORT_SHA = /^[0-9a-f]{7,40}$/u;
 const NATIVE_PLATFORMS = {
 	macos: "macos-15",
 	windows: "windows-2025",
@@ -16,15 +17,6 @@ export function toManifestVersion(version) {
 		throw new Error(`Expected a stable semantic version, received: ${version}`);
 	}
 	return `${version}.0`;
-}
-
-function compareVersions(left, right) {
-	const leftParts = left.split(".").map(Number);
-	const rightParts = right.split(".").map(Number);
-	for (let index = 0; index < leftParts.length; index += 1) {
-		if (leftParts[index] !== rightParts[index]) return leftParts[index] - rightParts[index];
-	}
-	return 0;
 }
 
 function validatePlugin(plugin) {
@@ -53,36 +45,63 @@ function validatePlugin(plugin) {
 	}
 }
 
-export function createReleasePlan({ basePlugins, headPlugins }) {
-	const baseByPath = new Map(basePlugins.map((plugin) => [plugin.path, plugin]));
+export function parsePluginSelection(selection, availableNames) {
+	const requested = selection
+		.split(",")
+		.map((name) => name.trim())
+		.filter(Boolean);
+	if (requested.length === 0) throw new Error("Plugin selection must not be empty");
+	if (requested.includes("all")) {
+		if (requested.length !== 1) throw new Error("Use all by itself or select explicit plugin names");
+		return [...availableNames].sort();
+	}
+	const seen = new Set();
+	for (const name of requested) {
+		if (!availableNames.includes(name)) throw new Error(`Unknown plugin: ${name}`);
+		if (seen.has(name)) throw new Error(`Plugin selected more than once: ${name}`);
+		seen.add(name);
+	}
+	return requested;
+}
+
+export function createReleaseTag({ name, version, releaseKind, shortSha }) {
+	if (!RELEASE_KINDS.has(releaseKind)) throw new Error("Release kind must be rc or stable");
+	if (!SHORT_SHA.test(shortSha)) throw new Error("Expected a hexadecimal Git short SHA");
+	return releaseKind === "rc" ? `${name}@${version}-rc.${shortSha}` : `${name}@${version}`;
+}
+
+export function createReleasePlan({ plugins: discoveredPlugins, selection, releaseKind, shortSha }) {
+	const byName = new Map();
+	for (const plugin of discoveredPlugins) {
+		if (byName.has(plugin.name)) {
+			throw new Error(`Duplicate plugin package name: ${plugin.name}`);
+		}
+		byName.set(plugin.name, plugin);
+	}
+	const selectedNames = parsePluginSelection(selection, [...byName.keys()]);
 	const plugins = [];
 	const native = [];
 
-	for (const plugin of [...headPlugins].sort((left, right) => left.path.localeCompare(right.path))) {
+	for (const name of selectedNames) {
+		const plugin = byName.get(name);
 		validatePlugin(plugin);
-		const basePlugin = baseByPath.get(plugin.path);
-		if (!basePlugin || basePlugin.version === plugin.version) continue;
-		toManifestVersion(basePlugin.version);
-		if (compareVersions(plugin.version, basePlugin.version) <= 0) {
-			throw new Error(`${plugin.name} version must increase from ${basePlugin.version} to ${plugin.version}`);
-		}
-
 		const nativePlatforms = [...new Set(plugin.nativePlatforms)];
-		const releasePlugin = {
+		const tag = createReleaseTag({ name: plugin.name, version: plugin.version, releaseKind, shortSha });
+		plugins.push({
 			hasNative: nativePlatforms.length > 0,
 			installer: `${plugin.uuid}.streamDeckPlugin`,
 			name: plugin.name,
-			nativeArtifactPattern: `${plugin.name}-${plugin.version}-native-*`,
+			nativeArtifactPattern: `${tag}-native-*`,
 			nativePlatforms,
 			path: plugin.path,
-			tag: `${plugin.name}@${plugin.version}`,
+			prerelease: releaseKind === "rc",
+			tag,
 			version: plugin.version,
-		};
-		plugins.push(releasePlugin);
+		});
 
 		for (const platform of nativePlatforms) {
 			native.push({
-				artifact: `${plugin.name}-${plugin.version}-native-${platform}`,
+				artifact: `${tag}-native-${platform}`,
 				name: plugin.name,
 				path: plugin.path,
 				platform,
@@ -96,10 +115,22 @@ export function createReleasePlan({ basePlugins, headPlugins }) {
 
 async function findPluginManifest(pluginRoot) {
 	const entries = await readdir(pluginRoot, { withFileTypes: true });
-	const candidates = entries
-		.filter((entry) => entry.isDirectory() && entry.name.endsWith(".sdPlugin"))
-		.map((entry) => path.join(pluginRoot, entry.name, "manifest.json"));
-	if (candidates.length !== 1) {
+	const candidates = (
+		await Promise.all(
+			entries
+				.filter((entry) => entry.isDirectory() && entry.name.endsWith(".sdPlugin"))
+				.map(async (entry) => {
+					const manifestPath = path.join(pluginRoot, entry.name, "manifest.json");
+					try {
+						await access(manifestPath);
+						return manifestPath;
+					} catch {
+						return undefined;
+					}
+				}),
+		)
+	).filter(Boolean);
+	if (candidates.length > 1) {
 		throw new Error(`Expected exactly one .sdPlugin manifest under ${pluginRoot}`);
 	}
 	return candidates[0];
@@ -108,7 +139,13 @@ async function findPluginManifest(pluginRoot) {
 async function readPluginFromFileSystem(root, appName) {
 	const pluginRoot = path.join(root, "apps", appName);
 	const packagePath = path.join(pluginRoot, "package.json");
+	try {
+		await access(packagePath);
+	} catch {
+		return undefined;
+	}
 	const manifestPath = await findPluginManifest(pluginRoot);
+	if (!manifestPath) return undefined;
 	const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
 	const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 	return {
@@ -124,100 +161,44 @@ async function readPluginFromFileSystem(root, appName) {
 	};
 }
 
-async function discoverFileSystemPlugins(root) {
+export async function discoverFileSystemPlugins(root) {
 	const appsRoot = path.join(root, "apps");
 	const entries = await readdir(appsRoot, { withFileTypes: true });
 	const plugins = await Promise.all(
 		entries.filter((entry) => entry.isDirectory()).map((entry) => readPluginFromFileSystem(root, entry.name)),
 	);
-	return plugins.sort((left, right) => left.path.localeCompare(right.path));
-}
-
-export async function synchronizePluginManifestVersions(root = workspaceRoot) {
-	const plugins = await discoverFileSystemPlugins(root);
-	const updates = [];
-	for (const plugin of plugins) {
-		const version = toManifestVersion(plugin.version);
-		if (plugin.manifestVersion === version) continue;
-		const manifest = JSON.parse(await readFile(plugin.manifestPath, "utf8"));
-		manifest.Version = version;
-		await writeFile(plugin.manifestPath, `${JSON.stringify(manifest, null, 4)}\n`);
-		updates.push({
-			manifestPath: path.relative(root, plugin.manifestPath).split(path.sep).join("/"),
-			name: plugin.name,
-			version,
-		});
-	}
-	return updates;
-}
-
-function git(root, args) {
-	return execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
-}
-
-function readJsonAtRef(root, ref, filePath) {
-	return JSON.parse(git(root, ["show", `${ref}:${filePath}`]));
-}
-
-function listFilesAtRef(root, ref) {
-	const output = git(root, ["ls-tree", "-r", "--name-only", ref, "--", "apps"]);
-	return output ? output.split("\n") : [];
-}
-
-function discoverPluginsAtRef(root, ref) {
-	const files = listFilesAtRef(root, ref);
-	const packagePaths = files.filter((filePath) => /^apps\/[^/]+\/package\.json$/u.test(filePath));
-	return packagePaths.map((packagePath) => {
-		const pluginPath = path.posix.dirname(packagePath);
-		const manifestPaths = files.filter(
-			(filePath) => filePath.startsWith(`${pluginPath}/`) && /\.sdPlugin\/manifest\.json$/u.test(filePath),
-		);
-		if (manifestPaths.length !== 1) {
-			throw new Error(`Expected exactly one .sdPlugin manifest under ${pluginPath} at ${ref}`);
-		}
-		const packageJson = readJsonAtRef(root, ref, packagePath);
-		const manifest = readJsonAtRef(root, ref, manifestPaths[0]);
-		return {
-			hasNativeStageTask: Boolean(packageJson.scripts?.["native:stage"]),
-			hasReleaseNativeTask: Boolean(packageJson.scripts?.["release:native"]),
-			manifestVersion: manifest.Version,
-			name: packageJson.name,
-			nativePlatforms: packageJson.release?.nativePlatforms ?? [],
-			path: pluginPath,
-			uuid: manifest.UUID,
-			version: packageJson.version,
-		};
-	});
+	return plugins.filter(Boolean).sort((left, right) => left.path.localeCompare(right.path));
 }
 
 function parseArgs(args) {
 	const options = { root: workspaceRoot };
 	for (let index = 0; index < args.length; index += 1) {
 		const argument = args[index];
-		if (argument === "--sync-manifests") options.syncManifests = true;
-		else if (argument === "--base") options.base = args[++index];
-		else if (argument === "--head") options.head = args[++index];
+		if (argument === "--plugins") options.selection = args[++index];
+		else if (argument === "--kind") options.releaseKind = args[++index];
+		else if (argument === "--sha") options.shortSha = args[++index];
 		else if (argument === "--root") options.root = path.resolve(args[++index]);
 		else throw new Error(`Unknown argument: ${argument}`);
+	}
+	if (!options.selection || !options.releaseKind || !options.shortSha) {
+		throw new Error("Release planning requires --plugins, --kind, and --sha.");
 	}
 	return options;
 }
 
 async function main() {
 	const options = parseArgs(process.argv.slice(2));
-	if (options.syncManifests) {
-		const updates = await synchronizePluginManifestVersions(options.root);
-		console.log(JSON.stringify({ updated: updates }));
-		return;
-	}
-	if (!options.base || !options.head) {
-		throw new Error("Release planning requires --base and --head refs.");
-	}
-	const plan = createReleasePlan({
-		basePlugins: discoverPluginsAtRef(options.root, options.base),
-		headPlugins: discoverPluginsAtRef(options.root, options.head),
-	});
-	console.log(JSON.stringify(plan));
+	const discoveredPlugins = await discoverFileSystemPlugins(options.root);
+	console.log(
+		JSON.stringify(
+			createReleasePlan({
+				plugins: discoveredPlugins,
+				selection: options.selection,
+				releaseKind: options.releaseKind,
+				shortSha: options.shortSha,
+			}),
+		),
+	);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

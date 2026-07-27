@@ -39,9 +39,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate release intent
-        run: pnpm release:status --since=origin/main
-
       - name: Format check
         run: pnpm format:check
 

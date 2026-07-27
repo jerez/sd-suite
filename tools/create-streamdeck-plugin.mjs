@@ -395,8 +395,8 @@ export function renderPluginReadme(context) {
 		"pnpm test",
 		"```",
 		"",
-		"Declare shipped changes from the workspace root with `pnpm changeset`.",
-		"The shared release workflow packages this plugin only after a reviewed version pull request increases its package version.",
+		"Plugin versions are changed explicitly in reviewed pull requests.",
+		"Publish installers with the manual Release plugins workflow.",
 		"",
 	].join("\n");
 }
