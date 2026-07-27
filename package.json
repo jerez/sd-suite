@@ -7,7 +7,6 @@
     "type": "module",
     "scripts": {
         "build": "turbo run build",
-        "changeset": "changeset",
         "lint": "eslint . --max-warnings 0",
         "lint:fix": "eslint . --fix",
         "native:build": "turbo run native:build",
@@ -20,8 +19,6 @@
         "plugin:validate": "turbo run validate",
         "release:plan": "node tools/plugin-release.mjs",
         "release:native": "turbo run release:native",
-        "release:status": "changeset status",
-        "release:version": "changeset version && node tools/plugin-release.mjs --sync-manifests",
         "test": "vitest run --passWithNoTests && turbo run test",
         "test:coverage": "vitest run --coverage --passWithNoTests",
         "test:unit": "vitest run --passWithNoTests",
@@ -31,7 +28,6 @@
         "format:check": "prettier . --check"
     },
     "devDependencies": {
-        "@changesets/cli": "2.31.1",
         "@commitlint/cli": "^21.0.2",
         "@commitlint/config-conventional": "^21.2.0",
         "@elgato/cli": "1.7.4",

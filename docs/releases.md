@@ -1,77 +1,70 @@
 # Plugin releases
 
-This guide defines how maintainers version and release Stream Deck plugins from
-the monorepo. Plugins are versioned independently. A release contains only the
-plugins selected by reviewed Changesets.
+## Version plugins
 
-## Declare a shipped change
+Plugin versions are independent and are changed explicitly in normal reviewed
+pull requests. Keep `package.json` `major.minor.patch` synchronized with
+manifest `major.minor.patch.0`.
 
-Run this command from the workspace root before opening or updating a pull
-request that changes shipped plugin behavior:
+Choose the semantic version change from the plugin's user-visible impact:
 
-```sh
-pnpm changeset
-```
-
-Select each affected plugin and choose its semantic version bump:
-
-| Bump    | Use for                                                        |
+| Change  | Use for                                                        |
 | ------- | -------------------------------------------------------------- |
 | `patch` | Fixes and compatible internal improvements                     |
 | `minor` | New compatible user-facing functionality                       |
 | `major` | Breaking behavior, settings, or platform compatibility changes |
 
-Shared workspace packages are not released independently. If a shared-package
-change affects one or more plugins, select those plugins in the Changeset.
+Shared workspace packages are not released independently. When a shared change
+affects a plugin, update that plugin's version explicitly in the same reviewed
+pull request.
 
-## Prepare a version pull request
+## Start a release
 
-When pending changes are ready for release:
+Run the `Release plugins` workflow manually. Select a Git ref, one or more
+dynamically discovered plugins (or `all`), `rc` or `stable`, and optional notes.
+The workflow resolves the selected ref to a commit, validates every selected
+plugin and version before building, and packages only the requested plugins.
 
-1. Create a branch from current `main`.
-2. Inspect the pending release plan:
+For each selected plugin, the workflow builds declared native outputs on their
+supported runners, transfers those ignored outputs as temporary artifacts,
+stages and validates them inside the plugin package, and creates the installer.
+Each plugin publishes after its own installer succeeds. A multi-plugin dispatch
+can therefore publish some plugins even if another plugin fails. Rerun by
+selecting only identities that have not already been published.
 
-    ```sh
-    pnpm release:status
-    ```
+## Release candidates
 
-3. Apply the version plan:
+RCs use `<plugin>@<version>-rc.<short-sha>`, are GitHub prereleases, and retain
+the committed manifest version. They are manually side-loaded and do not provide
+automatic upgrade ordering.
 
-    ```sh
-    pnpm release:version
-    ```
+Use an RC to distribute a commit-specific installer for testing without
+changing the plugin's committed version solely for the candidate. If another
+candidate is required from a different commit, dispatch the workflow at that
+new ref; its short SHA gives it a distinct release identity.
 
-4. Review the package versions, plugin changelogs, consumed Changesets, and
-   Stream Deck manifest versions.
-5. Commit the generated version changes and open a normal pull request.
+## Stable releases
 
-`release:version` converts a package version such as `1.2.3` to the Stream Deck
-manifest version `1.2.3.0`. The version pull request runs the same CI checks as
-other pull requests. Merging it is the explicit release authorization.
+Stable releases use `<plugin>@<version>` and are normal GitHub Releases. Stable
+means canonical on GitHub, not submitted to the Elgato Marketplace.
 
-## What happens after merge
+Dispatch `stable` only after the reviewed package and manifest versions identify
+the intended canonical release. Marketplace submission, review, and update
+distribution remain separate from this repository workflow.
 
-The `Release plugins` workflow compares the pushed range on `main`. It selects
-only plugin packages whose `package.json` version increased. A source change or
-dependency change without a plugin version increase produces an empty release
-plan and no release.
+## Immutability
 
-For each selected plugin, the workflow:
+Existing tags and releases are never replaced. A duplicate identity fails
+before publication.
 
-1. Builds release-native outputs on each declared platform through Turbo.
-2. Transfers the ignored native outputs between jobs as temporary workflow
-   artifacts.
-3. Stages native outputs when required and packages the plugin through Turbo.
-4. Creates a GitHub Release tagged `<package>@<version>`.
-5. Attaches the `<plugin-uuid>.streamDeckPlugin` installer to that release.
-
-The tag is created only after packaging succeeds. Re-running a completed release
-replaces the installer asset instead of creating a second release.
+This applies to both RC and stable identities. Re-running a dispatch with an
+already published tag does not overwrite its installer, notes, tag, or GitHub
+Release.
 
 ## Native plugin contract
 
-A plugin that ships compiled native code declares its release platforms in its
-package manifest:
+Native plugins declare `release.nativePlatforms` and package-owned
+`release:native` and `native:stage` scripts:
 
 ```json
 {
@@ -85,21 +78,24 @@ package manifest:
 }
 ```
 
-Supported platform names are `macos` and `windows`. The `release:native` task
-must build and verify release-quality output for the current host under
-`.native/<platform>/`. The `native:stage` task must copy the complete set of
-downloaded platform outputs into the `.sdPlugin` package and validate the staged
-boundary.
+Supported platform names remain `macos` and `windows`; release-native output
+stays under `.native/<platform>/`, and staging copies and validates the complete
+platform set inside the plugin package.
+
+The package-owned `release:native` task builds and verifies release-quality
+output for the current host. The package-owned `native:stage` task receives all
+declared platform outputs, copies them into the `.sdPlugin` package, and
+validates the staged boundary before packaging. Turbo orchestrates those tasks
+without owning plugin-specific compiler or staging details.
 
 Plugins without native code omit `release.nativePlatforms`, `release:native`,
-and `native:stage`. They use the same generic package and GitHub Release job.
+and `native:stage`. They use the same manual selection, validation, packaging,
+and GitHub Release flow without native build jobs.
 
 ## Artifact ownership
 
-Generated native executables, compiler output, staged native files, and
-`.streamDeckPlugin` installers are build products. Keep them ignored. The release
-workflow uses one-day intermediate artifacts for native job transfer and stores
-the final installer on the corresponding GitHub Release.
-
-Normal CI never compiles native executables, stages release binaries, packages
-installers, creates tags, or uploads release artifacts.
+Native executables, compiler output, staged files, and installers remain ignored
+build products. Temporary native transfer artifacts retain one-day storage,
+while final installers belong to their plugin-specific GitHub Releases. Normal
+CI does not build release-native output, package installers, or publish
+releases.

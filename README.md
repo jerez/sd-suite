@@ -36,7 +36,7 @@ tools/
 - pnpm workspace with Turbo
 - TypeScript, ESLint, Prettier, and Vitest
 - Package-level Stream Deck validation and packaging commands where applicable
-- Changesets for independent plugin versions and reviewed release intent
+- Explicit plugin versions and manually dispatched GitHub Releases
 
 ## Working With Agents
 
@@ -68,9 +68,9 @@ Pull request titles should follow Conventional Commits, for example
 `fix(control-mesh): handle expired MCP session`. With squash-only merges, the
 PR title is intended to become the final commit message on `main`.
 
-Pull requests that change shipped plugin behavior include a Changeset for each
-affected plugin. See [Plugin releases](./docs/releases.md) for version selection,
-version pull requests, native build ownership, and GitHub Release artifacts.
+Plugin versions are changed explicitly in normal reviewed pull requests. See
+[Plugin releases](./docs/releases.md) for version selection, manual workflow
+dispatch, native build ownership, and GitHub Release artifacts.
 
 ## Trademark Notice
 
