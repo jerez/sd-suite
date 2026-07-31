@@ -103,8 +103,8 @@ importers:
         specifier: 1.29.0
         version: 1.29.0(zod@3.25.76)
       bonjour-service:
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^1.4.3
+        version: 1.4.3
     devDependencies:
       '@elgato/cli':
         specifier: 1.7.4
@@ -2437,8 +2437,8 @@ packages:
     resolution: {integrity: sha512-oP5VkATKlNwcgvxi0vM0p/D3n2C3EReYVX+DNYs5TjZFn/oQt2j+4sVJtSMr18pdRr8wjTcBl6LoV+FUwzPmNA==}
     engines: {node: '>=18'}
 
-  bonjour-service@1.4.0:
-    resolution: {integrity: sha512-fGQtj1qdR9vIKjFiWPQd52qIqwjaYqhcI40JEiDuvlZ86E7ZBPBwY9fPgHy9r2rYGIjiRfctNPYz6OQU73ww2w==}
+  bonjour-service@1.4.3:
+    resolution: {integrity: sha512-2Kd5UYlFUVgAKMTyuBLl6w49wqfOnbxHqmuH0oCl/n7TfAikR0zoowNOP5BU4dfXmm+Vr9JyEN370auSMx+CNg==}
 
   brace-expansion@2.1.2:
     resolution: {integrity: sha512-w5JZcKgdhDOgOwm8H+KgbosopHMuGcl6qbulwjtz3SM7I7P3yW1eAjzMPLrIE+NQ9vjgANKHWeMHnrT0OXW1oA==}
@@ -6523,7 +6523,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  bonjour-service@1.4.0:
+  bonjour-service@1.4.3:
     dependencies:
       fast-deep-equal: 3.1.3
       multicast-dns: 7.2.5
