@@ -14,8 +14,7 @@ type DataSourceItem = {
 };
 
 type ExecuteRemoteActionPropertyInspectorMessage =
-	| { event: "getRemoteActions"; isRefresh?: true }
-	| { event: "getTrustedPeers"; isRefresh?: true };
+	{ event: "getRemoteActions"; isRefresh?: true } | { event: "getTrustedPeers"; isRefresh?: true };
 
 type ExecuteRemoteActionPropertyInspectorResult = {
 	actionDescriptions?: Record<string, string>;
