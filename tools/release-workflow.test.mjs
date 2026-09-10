@@ -19,6 +19,14 @@ describe("release workflow", () => {
 		expect(workflow).toContain("Missing native release output for $platform");
 	});
 
+	it("creates native archives with a runner-independent output path", async () => {
+		const workflow = await readFile(workflowPath, "utf8");
+
+		expect(workflow).toContain('-czf "$NATIVE_PLATFORM.tar.gz"');
+		expect(workflow).toContain('mv "$NATIVE_PLATFORM.tar.gz" "$RUNNER_TEMP/native-artifact/"');
+		expect(workflow).not.toContain('-czf "$RUNNER_TEMP/native-artifact/');
+	});
+
 	it("continues only when GitHub reports that a release does not exist", async () => {
 		const workflow = await readFile(workflowPath, "utf8");
 
