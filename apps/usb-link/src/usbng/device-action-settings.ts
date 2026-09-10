@@ -4,8 +4,7 @@ import type { DeviceActionSettings, ParsedDeviceActionSettings } from "./device-
  * Result of validating and normalizing raw Stream Deck action settings.
  */
 export type DeviceActionSettingsParseResult =
-	| { ok: true; value: ParsedDeviceActionSettings }
-	| { error: string; ok: false };
+	{ ok: true; value: ParsedDeviceActionSettings } | { error: string; ok: false };
 
 /**
  * Validates the user-provided device name and returns a trimmed value that is

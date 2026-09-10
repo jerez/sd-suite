@@ -2,14 +2,7 @@
  * Device form factor describing the physical type of audio output.
  */
 export type DeviceFormFactor =
-	| "headphones"
-	| "speakers"
-	| "line-out"
-	| "digital"
-	| "spdif"
-	| "hdmi"
-	| "displayport"
-	| "unknown";
+	"headphones" | "speakers" | "line-out" | "digital" | "spdif" | "hdmi" | "displayport" | "unknown";
 
 /**
  * Transport type describing how the device connects to the system.

@@ -42,7 +42,7 @@ const pngAssets = [
 
 function pngChunkTypes(png: Buffer): string[] {
 	const chunks: string[] = [];
-	for (let offset = 8; offset < png.length; ) {
+	for (let offset = 8; offset < png.length;) {
 		const length = png.readUInt32BE(offset);
 		chunks.push(png.toString("ascii", offset + 4, offset + 8));
 		offset += length + 12;
