@@ -156,7 +156,8 @@ jobs:
           PLUGIN_PATH: ${{ matrix.release.path }}
         run: |
           mkdir -p "$RUNNER_TEMP/native-artifact"
-          tar -C "$PLUGIN_PATH/.native" -czf "$RUNNER_TEMP/native-artifact/$NATIVE_PLATFORM.tar.gz" "$NATIVE_PLATFORM"
+          tar -C "$PLUGIN_PATH/.native" -czf "$NATIVE_PLATFORM.tar.gz" "$NATIVE_PLATFORM"
+          mv "$NATIVE_PLATFORM.tar.gz" "$RUNNER_TEMP/native-artifact/"
 
       - name: Upload native release output
         uses: actions/upload-artifact@v7
