@@ -54,6 +54,25 @@ describe("createMacosUsbngAdapter", () => {
 		expect(runCommand).toHaveBeenCalledWith("/Library/Frameworks/EveUSB.framework/Support/eveusbc", ["ls", "net"]);
 	});
 
+	it("discovers remote devices on an explicit server through eveusbc explore", async () => {
+		const runCommand = vi
+			.fn()
+			.mockResolvedValue("remote usbng-server.example.test,,56228,usb3,port1,,Stream Deck Plus,,,,,,,\n");
+		const adapter = createMacosUsbngAdapter({ runCommand });
+
+		await expect(adapter.listRemoteDevices("usbng-server.example.test")).resolves.toEqual([
+			{
+				id: "usbng-server.example.test:56228",
+				name: "Stream Deck Plus",
+				state: "remote",
+			},
+		]);
+		expect(runCommand).toHaveBeenCalledWith("/Library/Frameworks/EveUSB.framework/Support/eveusbc", [
+			"explore",
+			"usbng-server.example.test",
+		]);
+	});
+
 	it("lists shared local devices through eveusbc ls shared", async () => {
 		const runCommand = vi.fn().mockResolvedValue("shared ,,3300,usb3,3-1,,Stream Deck Plus,,,,,,,\n");
 		const adapter = createMacosUsbngAdapter({

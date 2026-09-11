@@ -14,7 +14,7 @@ the same machine.
 ## When Not to Use USB Link
 
 - You need remote delegation across machines.
-- You need host, port, or credential fields in Stream Deck settings.
+- You need remote credentials or per-device port overrides in Stream Deck settings.
 
 ## Documentation
 

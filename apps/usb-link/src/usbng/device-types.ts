@@ -4,6 +4,7 @@
 export type DeviceActionSettings = {
 	deviceId?: string;
 	deviceName?: string;
+	remoteServer?: string;
 };
 
 /**

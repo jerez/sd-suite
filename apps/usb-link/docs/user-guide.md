@@ -12,14 +12,15 @@ USB Network Gate installation on that machine.
 ## Configure a USB Link Key
 
 1. Drag one of the four USB Link actions to a Stream Deck key.
-2. Open the property inspector for that action.
+2. Open the property inspector for that action. For Connect Device or
+   Disconnect Device, enter the remote server hostname or IP address.
 3. Select the device from the property inspector. Use the refresh button if the
    USB Network Gate device list changed while the inspector was open.
 4. Press the key to test the action.
 
 USB Link stores the selected USB Network Gate device ID and its visible name in
-Stream Deck settings. It does not store credentials or expose host and port
-fields.
+Stream Deck settings. Remote actions also store the server address used for
+discovery. USB Link does not store credentials or expose per-device port fields.
 
 ## Actions
 
@@ -55,10 +56,12 @@ window.
 
 ## Platform Notes
 
-- macOS uses the local `eveusbc` CLI and USB Network Gate app automation.
+- macOS uses `eveusbc explore <server>` when a remote server is configured and
+  falls back to the local `eveusbc ls net` cache otherwise.
 - Windows uses the installed USB Network Gate client CLI.
-- On Windows, remote connect and disconnect act on remote devices already known
-  to the local USB Network Gate client.
+- On Windows, a configured server is queried with
+  `find-remote-devices <server>`; without one, only devices already added to the
+  local USB Network Gate client are available.
 
 ## Troubleshooting
 

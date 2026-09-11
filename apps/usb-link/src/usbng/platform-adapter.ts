@@ -11,7 +11,7 @@ export interface UsbngPlatformAdapter {
 	/**
 	 * Lists remote devices that can be connected or disconnected on this machine.
 	 */
-	listRemoteDevices(): Promise<RemoteUsbngDevice[]>;
+	listRemoteDevices(server?: string): Promise<RemoteUsbngDevice[]>;
 	/**
 	 * Lists local devices currently shared by this machine.
 	 */

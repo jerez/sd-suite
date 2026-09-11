@@ -49,33 +49,22 @@ export function createWindowsUsbngAdapter(options: CreateWindowsUsbngAdapterOpti
 			const output = await runUsbServiceCommand(runCommand, usbServicePaths, ["show-usb-list"]);
 			return parseWindowsLocalDevices(output);
 		},
-		async listRemoteDevices(): Promise<RemoteUsbngDevice[]> {
+		async listRemoteDevices(server?: string): Promise<RemoteUsbngDevice[]> {
 			const addedDevices = parseWindowsRemoteDevices(
 				await runUsbServiceCommand(runCommand, usbServicePaths, ["show-remote-devices"]),
 			);
-			if (addedDevices.length === 0) {
+			const servers = new Set(addedDevices.map((device) => device.server));
+			if (server?.trim()) {
+				servers.add(server.trim());
+			}
+			if (servers.size === 0) {
 				return [];
 			}
 
-			const discoveredDevices = await discoverKnownRemoteDevices(runCommand, usbServicePaths, addedDevices);
-			const discoveredDevicesById = new Map(discoveredDevices.map((device) => [device.id, device]));
+			const discoveredDevices = await discoverRemoteDevices(runCommand, usbServicePaths, servers);
+			const devicesById = new Map([...addedDevices, ...discoveredDevices].map((device) => [device.id, device]));
 
-			return addedDevices.map((device) => {
-				const discoveredDevice = discoveredDevicesById.get(device.id);
-				if (!discoveredDevice) {
-					return {
-						id: device.id,
-						name: device.name,
-						state: device.state,
-					};
-				}
-
-				return {
-					id: discoveredDevice.id,
-					name: discoveredDevice.name,
-					state: discoveredDevice.state,
-				};
-			});
+			return [...devicesById.values()].map(({ id, name, state }) => ({ id, name, state }));
 		},
 		async listSharedDevices(): Promise<LocalUsbngDevice[]> {
 			const output = await runUsbServiceCommand(runCommand, usbServicePaths, ["show-shared-usb"]);
@@ -127,21 +116,13 @@ async function runUsbServiceCommand(
 	throw lastError ?? new UsbngNotAvailableError();
 }
 
-async function discoverKnownRemoteDevices(
+async function discoverRemoteDevices(
 	runCommand: RunCommand,
 	usbServicePaths: string[],
-	addedDevices: ParsedWindowsRemoteDevice[],
+	servers: Iterable<string>,
 ): Promise<ParsedWindowsRemoteDevice[]> {
-	const devicesByServer = new Map<string, ParsedWindowsRemoteDevice[]>();
-	for (const device of addedDevices) {
-		// Discover once per server even when multiple added devices point at the same host.
-		const serverDevices = devicesByServer.get(device.server) ?? [];
-		serverDevices.push(device);
-		devicesByServer.set(device.server, serverDevices);
-	}
-
 	const discoveredDevices: ParsedWindowsRemoteDevice[] = [];
-	for (const server of devicesByServer.keys()) {
+	for (const server of servers) {
 		try {
 			const output = await runUsbServiceCommand(runCommand, usbServicePaths, ["find-remote-devices", server]);
 			discoveredDevices.push(...parseWindowsRemoteDevices(output));

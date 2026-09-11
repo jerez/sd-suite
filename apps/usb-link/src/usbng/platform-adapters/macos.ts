@@ -41,8 +41,9 @@ export function createMacosUsbngAdapter(options: CreateMacosUsbngAdapterOptions 
 		async listLocalDevices(): Promise<LocalUsbngDevice[]> {
 			return parseLocalUsbngDevices(await runCommand(eveusbcPath, ["ls", "local"]));
 		},
-		async listRemoteDevices(): Promise<RemoteUsbngDevice[]> {
-			return parseNetworkUsbngDevices(await runCommand(eveusbcPath, ["ls", "net"]));
+		async listRemoteDevices(server?: string): Promise<RemoteUsbngDevice[]> {
+			const host = server?.trim();
+			return parseNetworkUsbngDevices(await runCommand(eveusbcPath, host ? ["explore", host] : ["ls", "net"]));
 		},
 		async listSharedDevices(): Promise<LocalUsbngDevice[]> {
 			return parseSharedUsbngDevices(await runCommand(eveusbcPath, ["ls", "shared"]));
