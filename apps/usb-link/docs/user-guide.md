@@ -56,8 +56,8 @@ window.
 
 ## Platform Notes
 
-- macOS uses `eveusbc explore <server>` when a remote server is configured and
-  falls back to the local `eveusbc ls net` cache otherwise.
+- macOS refreshes the remote server with `eveusbc explore <server>`, then reads
+  the resulting `eveusbc ls net` list.
 - Windows uses the installed USB Network Gate client CLI.
 - On Windows, a configured server is queried with
   `find-remote-devices <server>`; without one, only devices already added to the

@@ -44,7 +44,7 @@ macOS uses the installed `eveusbc` CLI and USB Network Gate's AppleScript API:
 
 - local enumeration: `eveusbc ls local`
 - shared enumeration: `eveusbc ls shared`
-- remote enumeration: `eveusbc explore <server>` when configured, otherwise
+- remote enumeration: `eveusbc explore <server>` when configured, followed by
   `eveusbc ls net`
 - share: AppleScript `share` matched by the selected device ID
 - unshare: `eveusbc unshare <device-id>`
