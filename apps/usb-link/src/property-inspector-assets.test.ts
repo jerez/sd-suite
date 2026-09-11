@@ -39,6 +39,7 @@ describe("USB Link property inspector assets", () => {
 			const html = readFileSync(path.join(pluginPath, "ui", fileName), "utf8");
 			expect(html).toContain("<sdpi-textfield");
 			expect(html).toContain('setting="remoteServer"');
+			expect(html).toContain("hot-reload");
 		}
 	});
 

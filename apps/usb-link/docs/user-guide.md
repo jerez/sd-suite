@@ -14,8 +14,9 @@ USB Network Gate installation on that machine.
 1. Drag one of the four USB Link actions to a Stream Deck key.
 2. Open the property inspector for that action. For Connect Device or
    Disconnect Device, enter the remote server hostname or IP address.
-3. Select the device from the property inspector. Use the refresh button if the
-   USB Network Gate device list changed while the inspector was open.
+3. Select the device from the property inspector. The device list refreshes when
+   the server setting changes; use the refresh button if the USB Network Gate
+   device list changes afterward.
 4. Press the key to test the action.
 
 USB Link stores the selected USB Network Gate device ID and its visible name in
@@ -56,8 +57,8 @@ window.
 
 ## Platform Notes
 
-- macOS uses `eveusbc explore <server>` when a remote server is configured and
-  falls back to the local `eveusbc ls net` cache otherwise.
+- macOS refreshes the remote server with `eveusbc explore <server>`, then reads
+  the resulting `eveusbc ls net` list.
 - Windows uses the installed USB Network Gate client CLI.
 - On Windows, a configured server is queried with
   `find-remote-devices <server>`; without one, only devices already added to the

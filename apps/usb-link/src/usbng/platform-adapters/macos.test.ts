@@ -54,10 +54,11 @@ describe("createMacosUsbngAdapter", () => {
 		expect(runCommand).toHaveBeenCalledWith("/Library/Frameworks/EveUSB.framework/Support/eveusbc", ["ls", "net"]);
 	});
 
-	it("discovers remote devices on an explicit server through eveusbc explore", async () => {
+	it("refreshes the network list after exploring an explicit server", async () => {
 		const runCommand = vi
 			.fn()
-			.mockResolvedValue("remote usbng-server.example.test,,56228,usb3,port1,,Stream Deck Plus,,,,,,,\n");
+			.mockResolvedValueOnce("")
+			.mockResolvedValueOnce("remote usbng-server.example.test,,56228,usb3,port1,,Stream Deck Plus,,,,,,,\n");
 		const adapter = createMacosUsbngAdapter({ runCommand });
 
 		await expect(adapter.listRemoteDevices("usbng-server.example.test")).resolves.toEqual([
@@ -67,9 +68,13 @@ describe("createMacosUsbngAdapter", () => {
 				state: "remote",
 			},
 		]);
-		expect(runCommand).toHaveBeenCalledWith("/Library/Frameworks/EveUSB.framework/Support/eveusbc", [
+		expect(runCommand).toHaveBeenNthCalledWith(1, "/Library/Frameworks/EveUSB.framework/Support/eveusbc", [
 			"explore",
 			"usbng-server.example.test",
+		]);
+		expect(runCommand).toHaveBeenNthCalledWith(2, "/Library/Frameworks/EveUSB.framework/Support/eveusbc", [
+			"ls",
+			"net",
 		]);
 	});
 
