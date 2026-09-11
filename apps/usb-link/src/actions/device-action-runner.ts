@@ -1,6 +1,10 @@
 import streamDeck from "@elgato/streamdeck";
 
-import { type DeviceActionExecutionResult, executeDeviceAction } from "../usbng/device-action-core";
+import {
+	type DeviceActionExecutionResult,
+	executeDeviceAction,
+	filterRemoteDevicesForOperation,
+} from "../usbng/device-action-core";
 import { createUsbngPlatformAdapter } from "../usbng/platform";
 import type { UsbngPlatformAdapter } from "../usbng/platform-adapter";
 import type { DeviceActionSettings, DeviceOperation } from "../usbng/device-types";
@@ -24,6 +28,13 @@ type FeedbackImageController = {
 
 type ActionLogger = {
 	warn(message: string): void;
+};
+
+export type DeviceOptionsMessage = { event: "getUsbDevices"; isRefresh?: true };
+
+type DeviceOptionsResult = {
+	event: "getUsbDevices";
+	items: { disabled?: boolean; label: string; value: string }[];
 };
 
 /**
@@ -76,6 +87,46 @@ export async function runDeviceAction(input: RunDeviceActionInput): Promise<void
 		logger.warn(`USB Link ${input.operation} failed: ${getErrorMessage(error)}`);
 		await feedbackImages.showError(input.action);
 		await input.action.showAlert();
+	}
+}
+
+/**
+ * Lists valid devices for one action's property-inspector selector.
+ */
+export async function getDeviceOptions(
+	operation: DeviceOperation,
+	createPlatformAdapter: () => UsbngPlatformAdapter = createUsbngPlatformAdapter,
+): Promise<DeviceOptionsResult> {
+	try {
+		const adapter = createPlatformAdapter();
+		const devices =
+			operation === "share"
+				? await adapter.listLocalDevices()
+				: operation === "unshare"
+					? await adapter.listSharedDevices()
+					: filterRemoteDevicesForOperation(await adapter.listRemoteDevices(), operation);
+		const items = devices
+			.map((device) => ({ label: device.name, value: device.id }))
+			.sort((left, right) => left.label.localeCompare(right.label));
+
+		return {
+			event: "getUsbDevices",
+			items: items.length > 0 ? items : [{ disabled: true, label: "No matching USB devices found.", value: "" }],
+		};
+	} catch (error) {
+		return {
+			event: "getUsbDevices",
+			items: [{ disabled: true, label: `Devices unavailable: ${getErrorMessage(error)}`, value: "" }],
+		};
+	}
+}
+
+/**
+ * Responds to the SDPI datasource request for one USB Link action.
+ */
+export async function sendDeviceOptions(message: DeviceOptionsMessage, operation: DeviceOperation): Promise<void> {
+	if (message.event === "getUsbDevices") {
+		await streamDeck.ui.sendToPropertyInspector(await getDeviceOptions(operation));
 	}
 }
 

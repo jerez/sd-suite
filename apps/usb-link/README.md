@@ -9,13 +9,12 @@ the same machine.
   Deck.
 - You need one of four explicit actions: share, unshare, connect, or
   disconnect.
-- Device name is enough to identify the target device for each key.
+- Each key uses a refreshable device selector populated from USB Network Gate.
 
 ## When Not to Use USB Link
 
 - You need remote delegation across machines.
 - You need host, port, or credential fields in Stream Deck settings.
-- You need USB Link to guess between duplicate visible device names.
 
 ## Documentation
 

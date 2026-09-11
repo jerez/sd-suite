@@ -11,15 +11,17 @@ export type DeviceActionSettingsParseResult =
  * safe to use for device matching.
  */
 export function parseDeviceActionSettings(settings: DeviceActionSettings): DeviceActionSettingsParseResult {
+	const deviceId = settings.deviceId?.trim();
 	const deviceName = settings.deviceName?.trim();
-	if (!deviceName) {
-		return { error: "Device name is required.", ok: false };
+	if (!deviceId && !deviceName) {
+		return { error: "Device is required.", ok: false };
 	}
 
 	return {
 		ok: true,
 		value: {
-			deviceName,
+			deviceId,
+			deviceName: deviceName ?? deviceId ?? "",
 		},
 	};
 }

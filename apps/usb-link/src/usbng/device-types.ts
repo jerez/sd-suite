@@ -2,6 +2,7 @@
  * Raw action settings persisted by Stream Deck for a single USB Link action.
  */
 export type DeviceActionSettings = {
+	deviceId?: string;
 	deviceName?: string;
 };
 
@@ -9,6 +10,7 @@ export type DeviceActionSettings = {
  * Normalized action settings after validation succeeds.
  */
 export type ParsedDeviceActionSettings = {
+	deviceId?: string;
 	deviceName: string;
 };
 

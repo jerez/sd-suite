@@ -1,13 +1,17 @@
-import { action, type KeyDownEvent, SingletonAction } from "@elgato/streamdeck";
+import { action, type KeyDownEvent, type SendToPluginEvent, SingletonAction } from "@elgato/streamdeck";
 
 import type { DeviceActionSettings } from "../usbng/device-types";
-import { runDeviceAction } from "./device-action-runner";
+import { type DeviceOptionsMessage, runDeviceAction, sendDeviceOptions } from "./device-action-runner";
 
 /**
  * Stream Deck action that disconnects the local machine from a remote USBNG device.
  */
 @action({ UUID: "dev.jerez.sds.usb-link.disconnect-device" })
 export class DisconnectDevice extends SingletonAction<DeviceActionSettings> {
+	override async onSendToPlugin(ev: SendToPluginEvent<DeviceOptionsMessage, DeviceActionSettings>): Promise<void> {
+		await sendDeviceOptions(ev.payload, "disconnect");
+	}
+
 	override async onKeyDown(ev: KeyDownEvent<DeviceActionSettings>): Promise<void> {
 		await runDeviceAction({
 			action: ev.action,

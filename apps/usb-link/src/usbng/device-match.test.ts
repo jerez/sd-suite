@@ -1,6 +1,35 @@
 import { describe, expect, it } from "vitest";
 
-import { matchDeviceByName } from "./device-match";
+import { matchDevice, matchDeviceByName } from "./device-match";
+
+describe("matchDevice", () => {
+	it("uses the stable id when duplicate device names exist", () => {
+		expect(
+			matchDevice(
+				[
+					{ id: "32-2.2.1", name: "Brio 101" },
+					{ id: "32-2.2.2", name: "Brio 101" },
+				],
+				{ deviceId: "32-2.2.2", deviceName: "Brio 101" },
+			),
+		).toEqual({
+			ok: true,
+			value: { id: "32-2.2.2", name: "Brio 101" },
+		});
+	});
+
+	it("does not fall back to the name when a saved id is stale", () => {
+		expect(
+			matchDevice([{ id: "32-2.2.1", name: "Brio 101" }], {
+				deviceId: "32-2.2.2",
+				deviceName: "Brio 101",
+			}),
+		).toEqual({
+			error: 'No USB device with ID "32-2.2.2" was found.',
+			ok: false,
+		});
+	});
+});
 
 describe("matchDeviceByName", () => {
 	it("returns the exact matching device", () => {

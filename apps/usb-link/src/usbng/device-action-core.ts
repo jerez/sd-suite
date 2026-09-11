@@ -1,7 +1,12 @@
-import type { DeviceActionSettings, DeviceOperation, RemoteUsbngDevice } from "./device-types";
+import type {
+	DeviceActionSettings,
+	DeviceOperation,
+	ParsedDeviceActionSettings,
+	RemoteUsbngDevice,
+} from "./device-types";
 
 import { parseDeviceActionSettings } from "./device-action-settings";
-import { matchDeviceByName } from "./device-match";
+import { matchDevice } from "./device-match";
 import { UsbngNotAvailableError, type UsbngPlatformAdapter } from "./platform-adapter";
 
 /**
@@ -30,10 +35,10 @@ export async function executeDeviceAction(input: ExecuteDeviceActionInput): Prom
 
 	try {
 		if (input.operation === "share" || input.operation === "unshare") {
-			return await executeLocalDeviceAction(input.operation, parsedSettings.value.deviceName, input.adapter);
+			return await executeLocalDeviceAction(input.operation, parsedSettings.value, input.adapter);
 		}
 
-		return await executeRemoteDeviceAction(input.operation, parsedSettings.value.deviceName, input.adapter);
+		return await executeRemoteDeviceAction(input.operation, parsedSettings.value, input.adapter);
 	} catch (error) {
 		return mapAdapterError(input.operation, parsedSettings.value.deviceName, error);
 	}
@@ -41,11 +46,16 @@ export async function executeDeviceAction(input: ExecuteDeviceActionInput): Prom
 
 async function executeLocalDeviceAction(
 	operation: "share" | "unshare",
-	deviceName: string,
+	settings: ParsedDeviceActionSettings,
 	adapter: UsbngPlatformAdapter,
 ): Promise<DeviceActionExecutionResult> {
-	const devices = await adapter.listLocalDevices();
-	const matchedDevice = matchDeviceByName(devices, deviceName);
+	if (operation === "share" && settings.deviceId) {
+		await adapter.shareDevice({ id: settings.deviceId, name: settings.deviceName });
+		return { ok: true };
+	}
+
+	const devices = operation === "share" ? await adapter.listLocalDevices() : await adapter.listSharedDevices();
+	const matchedDevice = matchDevice(devices, settings);
 	if (!matchedDevice.ok) {
 		return matchedDevice;
 	}
@@ -61,11 +71,11 @@ async function executeLocalDeviceAction(
 
 async function executeRemoteDeviceAction(
 	operation: "connect" | "disconnect",
-	deviceName: string,
+	settings: ParsedDeviceActionSettings,
 	adapter: UsbngPlatformAdapter,
 ): Promise<DeviceActionExecutionResult> {
 	const devices = filterRemoteDevicesForOperation(await adapter.listRemoteDevices(), operation);
-	const matchedDevice = matchDeviceByName(devices, deviceName);
+	const matchedDevice = matchDevice(devices, settings);
 	if (!matchedDevice.ok) {
 		return matchedDevice;
 	}
@@ -79,7 +89,7 @@ async function executeRemoteDeviceAction(
 	return { ok: true };
 }
 
-function filterRemoteDevicesForOperation(
+export function filterRemoteDevicesForOperation(
 	devices: RemoteUsbngDevice[],
 	operation: "connect" | "disconnect",
 ): RemoteUsbngDevice[] {

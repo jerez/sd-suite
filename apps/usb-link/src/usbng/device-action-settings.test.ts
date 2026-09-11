@@ -16,14 +16,39 @@ describe("parseDeviceActionSettings", () => {
 		});
 	});
 
-	it("rejects an empty device name", () => {
+	it("prefers a stable device id while retaining the visible name", () => {
+		expect(
+			parseDeviceActionSettings({
+				deviceId: "  32-2.2.1  ",
+				deviceName: "  Stream Deck Plus  ",
+			}),
+		).toEqual({
+			ok: true,
+			value: {
+				deviceId: "32-2.2.1",
+				deviceName: "Stream Deck Plus",
+			},
+		});
+	});
+
+	it("rejects empty device settings", () => {
 		expect(
 			parseDeviceActionSettings({
 				deviceName: "   ",
 			}),
 		).toEqual({
-			error: "Device name is required.",
+			error: "Device is required.",
 			ok: false,
+		});
+	});
+
+	it("accepts a device id when no label was persisted", () => {
+		expect(parseDeviceActionSettings({ deviceId: "32-2.2.1" })).toEqual({
+			ok: true,
+			value: {
+				deviceId: "32-2.2.1",
+				deviceName: "32-2.2.1",
+			},
 		});
 	});
 });

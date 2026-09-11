@@ -1,4 +1,5 @@
 type NamedDevice = {
+	id: string;
 	name: string;
 };
 
@@ -6,6 +7,23 @@ type NamedDevice = {
  * Result of attempting to resolve a single device from a list by name.
  */
 export type DeviceMatchResult<TDevice> = { ok: true; value: TDevice } | { error: string; ok: false };
+
+/**
+ * Resolves by stable id when present, falling back to legacy name-only settings.
+ */
+export function matchDevice<TDevice extends NamedDevice>(
+	devices: TDevice[],
+	settings: { deviceId?: string; deviceName: string },
+): DeviceMatchResult<TDevice> {
+	if (!settings.deviceId) {
+		return matchDeviceByName(devices, settings.deviceName);
+	}
+
+	const device = devices.find((candidate) => candidate.id === settings.deviceId);
+	return device
+		? { ok: true, value: device }
+		: { error: `No USB device with ID "${settings.deviceId}" was found.`, ok: false };
+}
 
 /**
  * Resolves a device by name, preferring an exact trimmed match before falling

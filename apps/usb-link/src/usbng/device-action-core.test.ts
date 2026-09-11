@@ -9,6 +9,7 @@ function createAdapter(overrides: Partial<UsbngPlatformAdapter> = {}): UsbngPlat
 		disconnectDevice: vi.fn().mockResolvedValue(undefined),
 		listLocalDevices: vi.fn().mockResolvedValue([]),
 		listRemoteDevices: vi.fn().mockResolvedValue([]),
+		listSharedDevices: vi.fn().mockResolvedValue([]),
 		shareDevice: vi.fn().mockResolvedValue(undefined),
 		unshareDevice: vi.fn().mockResolvedValue(undefined),
 		...overrides,
@@ -35,7 +36,43 @@ describe("executeDeviceAction", () => {
 		expect(adapter.shareDevice).toHaveBeenCalledWith({ id: "32-2.2.1", name: "Brio 101" });
 	});
 
-	it("returns a validation error when the device name is missing", async () => {
+	it("uses the selected device id when names are duplicated", async () => {
+		const adapter = createAdapter({
+			listLocalDevices: vi.fn().mockResolvedValue([
+				{ id: "32-2.2.1", name: "Brio 101" },
+				{ id: "32-2.2.2", name: "Brio 101" },
+			]),
+		});
+
+		const result = await executeDeviceAction({
+			adapter,
+			operation: "share",
+			settings: { deviceId: "32-2.2.2", deviceName: "Brio 101" },
+		});
+
+		expect(result).toEqual({ ok: true });
+		expect(adapter.listLocalDevices).not.toHaveBeenCalled();
+		expect(adapter.shareDevice).toHaveBeenCalledWith({ id: "32-2.2.2", name: "Brio 101" });
+	});
+
+	it("lists shared devices when unsharing", async () => {
+		const adapter = createAdapter({
+			listLocalDevices: vi.fn().mockResolvedValue([{ id: "local", name: "Brio 101" }]),
+			listSharedDevices: vi.fn().mockResolvedValue([{ id: "shared", name: "Brio 101" }]),
+		});
+
+		const result = await executeDeviceAction({
+			adapter,
+			operation: "unshare",
+			settings: { deviceId: "shared", deviceName: "Brio 101" },
+		});
+
+		expect(result).toEqual({ ok: true });
+		expect(adapter.listLocalDevices).not.toHaveBeenCalled();
+		expect(adapter.unshareDevice).toHaveBeenCalledWith({ id: "shared", name: "Brio 101" });
+	});
+
+	it("returns a validation error when the device is missing", async () => {
 		const adapter = createAdapter();
 
 		const result = await executeDeviceAction({
@@ -45,7 +82,7 @@ describe("executeDeviceAction", () => {
 		});
 
 		expect(result).toEqual({
-			error: "Device name is required.",
+			error: "Device is required.",
 			ok: false,
 		});
 	});

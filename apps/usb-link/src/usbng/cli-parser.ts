@@ -7,6 +7,10 @@ const NETWORK_DEVICE_PATTERN = /^(remote|connected|disconnected)\s+(.+)$/;
 // device name that itself contains a comma cannot be recovered unambiguously and
 // will be truncated at the first comma. USB device names rarely contain commas.
 const NETWORK_DEVICE_NAME_INDEX = 6;
+const NETWORK_DEVICE_HOST_INDEX = 0;
+const NETWORK_DEVICE_PORT_INDEX = 2;
+const SHARED_DEVICE_ID_INDEX = 4;
+const SHARED_DEVICE_NAME_INDEX = 6;
 
 /**
  * Parses local-device rows returned by `eveusbc ls local`.
@@ -48,18 +52,36 @@ export function parseNetworkUsbngDevices(output: string): RemoteUsbngDevice[] {
 		}
 
 		const fields = rawId.split(",");
+		const host = fields[NETWORK_DEVICE_HOST_INDEX]?.trim();
+		const port = fields[NETWORK_DEVICE_PORT_INDEX]?.trim();
 		const name = fields[NETWORK_DEVICE_NAME_INDEX]?.trim();
-		if (!name) {
+		if (!host || !port || !name) {
 			return [];
 		}
 
 		return [
 			{
-				id: rawId,
+				id: `${host}:${port}`,
 				name,
 				state: toRemoteDeviceState(rawState),
 			},
 		];
+	});
+}
+
+/**
+ * Parses shared local-device rows returned by `eveusbc ls shared`.
+ */
+export function parseSharedUsbngDevices(output: string): LocalUsbngDevice[] {
+	return splitUsbngOutput(output).flatMap((line) => {
+		if (!line.startsWith("shared ")) {
+			return [];
+		}
+
+		const fields = line.slice("shared ".length).split(",");
+		const id = fields[SHARED_DEVICE_ID_INDEX]?.trim();
+		const name = fields[SHARED_DEVICE_NAME_INDEX]?.trim();
+		return id && name ? [{ id, name }] : [];
 	});
 }
 
