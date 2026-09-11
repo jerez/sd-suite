@@ -9,7 +9,8 @@ import { type DeviceOptionsMessage, runDeviceAction, sendDeviceOptions } from ".
 @action({ UUID: "dev.jerez.sds.usb-link.disconnect-device" })
 export class DisconnectDevice extends SingletonAction<DeviceActionSettings> {
 	override async onSendToPlugin(ev: SendToPluginEvent<DeviceOptionsMessage, DeviceActionSettings>): Promise<void> {
-		await sendDeviceOptions(ev.payload, "disconnect");
+		const settings = await ev.action.getSettings<DeviceActionSettings>();
+		await sendDeviceOptions(ev.payload, "disconnect", settings.remoteServer);
 	}
 
 	override async onKeyDown(ev: KeyDownEvent<DeviceActionSettings>): Promise<void> {

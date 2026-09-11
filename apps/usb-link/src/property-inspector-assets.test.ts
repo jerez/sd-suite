@@ -31,7 +31,14 @@ describe("USB Link property inspector assets", () => {
 			expect(html).toContain('label-setting="deviceName"');
 			expect(html).toContain('datasource="getUsbDevices"');
 			expect(html).toContain("show-refresh");
-			expect(html).not.toContain("sdpi-textfield");
+		}
+	});
+
+	it("accepts a server address for remote-device discovery", () => {
+		for (const fileName of ["connect-device.html", "disconnect-device.html"]) {
+			const html = readFileSync(path.join(pluginPath, "ui", fileName), "utf8");
+			expect(html).toContain("<sdpi-textfield");
+			expect(html).toContain('setting="remoteServer"');
 		}
 	});
 

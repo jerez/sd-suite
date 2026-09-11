@@ -96,6 +96,31 @@ describe("createWindowsUsbngAdapter", () => {
 		]);
 	});
 
+	it("discovers remote devices on an explicit server when none were previously added", async () => {
+		const runCommand = vi
+			.fn()
+			.mockResolvedValueOnce("USB Network Gate\n")
+			.mockResolvedValueOnce(
+				"Stream Deck Plus\t-usbng-server.example.test:56228\t-Crypt: disabled\t-Auth: disabled\t-Compressed: disabled\t-disconnected\n",
+			);
+		const adapter = createWindowsUsbngAdapter({
+			runCommand,
+			usbServicePaths: ["C:\\USBNG\\UsbService64.exe"],
+		});
+
+		await expect(adapter.listRemoteDevices("usbng-server.example.test")).resolves.toEqual([
+			{
+				id: "usbng-server.example.test:56228",
+				name: "Stream Deck Plus",
+				state: "remote",
+			},
+		]);
+		expect(runCommand).toHaveBeenNthCalledWith(2, "C:\\USBNG\\UsbService64.exe", [
+			"find-remote-devices",
+			"usbng-server.example.test",
+		]);
+	});
+
 	it("shares a local device through share-usb-port", async () => {
 		const runCommand = vi.fn().mockResolvedValue("");
 		const adapter = createWindowsUsbngAdapter({

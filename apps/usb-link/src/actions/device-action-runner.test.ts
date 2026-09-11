@@ -165,4 +165,17 @@ describe("getDeviceOptions", () => {
 			items: [{ label: "Stream Deck Plus", value: "host:3301" }],
 		});
 	});
+
+	it("uses the configured server when discovering remote options", async () => {
+		const adapter = createAdapterStub();
+		vi.mocked(adapter.listRemoteDevices).mockResolvedValue([
+			{ id: "usbng-server.example.test:56228", name: "Stream Deck Plus", state: "remote" },
+		]);
+
+		await expect(getDeviceOptions("connect", () => adapter, " usbng-server.example.test ")).resolves.toEqual({
+			event: "getUsbDevices",
+			items: [{ label: "Stream Deck Plus", value: "usbng-server.example.test:56228" }],
+		});
+		expect(adapter.listRemoteDevices).toHaveBeenCalledWith("usbng-server.example.test");
+	});
 });

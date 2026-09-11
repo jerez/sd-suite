@@ -8,7 +8,7 @@ Out of scope:
 
 - Control Mesh delegation
 - remote credential storage
-- hostname or port fields in button settings
+- per-device port fields in button settings
 
 ## Shared Core
 
@@ -26,6 +26,7 @@ Settings shape stays minimal:
 type DeviceActionSettings = {
     deviceId?: string;
     deviceName?: string;
+    remoteServer?: string;
 };
 ```
 
@@ -43,7 +44,8 @@ macOS uses the installed `eveusbc` CLI and USB Network Gate's AppleScript API:
 
 - local enumeration: `eveusbc ls local`
 - shared enumeration: `eveusbc ls shared`
-- remote enumeration: `eveusbc ls net`
+- remote enumeration: `eveusbc explore <server>` when configured, otherwise
+  `eveusbc ls net`
 - share: AppleScript `share` matched by the selected device ID
 - unshare: `eveusbc unshare <device-id>`
 - connect: `eveusbc connect <host:port>`
@@ -78,4 +80,6 @@ Important runtime caveat:
 - the Windows client can return useful output with a non-zero exit code
 - adapter logic treats `Error:` lines in command output as failure instead of trusting the exit code alone
 
-Remote connect and disconnect stay local-service only. The adapter enriches already-known remote endpoints with `find-remote-devices <server>` so the property inspector can show names when the base list would otherwise show `Unknown`.
+Remote connect and disconnect stay local-service only. The adapter queries the
+configured server with `find-remote-devices <server>` and merges those results
+with already-added endpoints from `show-remote-devices`.

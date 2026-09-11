@@ -96,6 +96,7 @@ export async function runDeviceAction(input: RunDeviceActionInput): Promise<void
 export async function getDeviceOptions(
 	operation: DeviceOperation,
 	createPlatformAdapter: () => UsbngPlatformAdapter = createUsbngPlatformAdapter,
+	remoteServer?: string,
 ): Promise<DeviceOptionsResult> {
 	try {
 		const adapter = createPlatformAdapter();
@@ -104,7 +105,10 @@ export async function getDeviceOptions(
 				? await adapter.listLocalDevices()
 				: operation === "unshare"
 					? await adapter.listSharedDevices()
-					: filterRemoteDevicesForOperation(await adapter.listRemoteDevices(), operation);
+					: filterRemoteDevicesForOperation(
+							await adapter.listRemoteDevices(remoteServer?.trim() || undefined),
+							operation,
+						);
 		const items = devices
 			.map((device) => ({ label: device.name, value: device.id }))
 			.sort((left, right) => left.label.localeCompare(right.label));
@@ -124,9 +128,15 @@ export async function getDeviceOptions(
 /**
  * Responds to the SDPI datasource request for one USB Link action.
  */
-export async function sendDeviceOptions(message: DeviceOptionsMessage, operation: DeviceOperation): Promise<void> {
+export async function sendDeviceOptions(
+	message: DeviceOptionsMessage,
+	operation: DeviceOperation,
+	remoteServer?: string,
+): Promise<void> {
 	if (message.event === "getUsbDevices") {
-		await streamDeck.ui.sendToPropertyInspector(await getDeviceOptions(operation));
+		await streamDeck.ui.sendToPropertyInspector(
+			await getDeviceOptions(operation, createUsbngPlatformAdapter, remoteServer),
+		);
 	}
 }
 
