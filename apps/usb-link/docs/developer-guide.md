@@ -38,6 +38,9 @@ legacy settings, matching stays strict:
 - case-insensitive exact fallback only
 - duplicate visible names fail explicitly
 
+Remote action property inspectors hot-reload their device datasource when
+Stream Deck persists a changed server setting.
+
 ## macOS Adapter
 
 macOS uses the installed `eveusbc` CLI and USB Network Gate's AppleScript API:

@@ -14,8 +14,9 @@ USB Network Gate installation on that machine.
 1. Drag one of the four USB Link actions to a Stream Deck key.
 2. Open the property inspector for that action. For Connect Device or
    Disconnect Device, enter the remote server hostname or IP address.
-3. Select the device from the property inspector. Use the refresh button if the
-   USB Network Gate device list changed while the inspector was open.
+3. Select the device from the property inspector. The device list refreshes when
+   the server setting changes; use the refresh button if the USB Network Gate
+   device list changes afterward.
 4. Press the key to test the action.
 
 USB Link stores the selected USB Network Gate device ID and its visible name in
