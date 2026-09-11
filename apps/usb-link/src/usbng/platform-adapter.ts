@@ -13,6 +13,10 @@ export interface UsbngPlatformAdapter {
 	 */
 	listRemoteDevices(): Promise<RemoteUsbngDevice[]>;
 	/**
+	 * Lists local devices currently shared by this machine.
+	 */
+	listSharedDevices(): Promise<LocalUsbngDevice[]>;
+	/**
 	 * Shares a local USB device through the local USBNG service.
 	 */
 	shareDevice(device: LocalUsbngDevice): Promise<void>;

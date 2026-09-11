@@ -23,10 +23,6 @@ function createSourcemapPathTransform() {
 const config = {
 	input: {
 		"bin/plugin": "src/plugin.ts",
-		"ui/share-device": "src/property-inspector/share-device.ts",
-		"ui/unshare-device": "src/property-inspector/unshare-device.ts",
-		"ui/connect-device": "src/property-inspector/connect-device.ts",
-		"ui/disconnect-device": "src/property-inspector/disconnect-device.ts",
 		"ui/sdpi-components": sdpiComponentsEntry,
 	},
 	output: {

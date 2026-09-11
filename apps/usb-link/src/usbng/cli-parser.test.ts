@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseLocalUsbngDevices, parseNetworkUsbngDevices } from "./cli-parser";
+import { parseLocalUsbngDevices, parseNetworkUsbngDevices, parseSharedUsbngDevices } from "./cli-parser";
 
 describe("parseLocalUsbngDevices", () => {
 	it("parses local device ids and names from eveusbc output", () => {
@@ -28,15 +28,23 @@ describe("parseNetworkUsbngDevices", () => {
 
 		expect(parseNetworkUsbngDevices(output)).toEqual([
 			{
-				id: "198.51.100.24,,56228,usb3,port1,,Stream Deck Plus,,,,198.51.100.40,,,",
+				id: "198.51.100.24:56228",
 				name: "Stream Deck Plus",
 				state: "remote",
 			},
 			{
-				id: "198.51.100.24,,60222,usb3,port2,,Brio 101,,,,,,,",
+				id: "198.51.100.24:60222",
 				name: "Brio 101",
 				state: "connected",
 			},
+		]);
+	});
+});
+
+describe("parseSharedUsbngDevices", () => {
+	it("parses local ids and names from eveusbc shared output", () => {
+		expect(parseSharedUsbngDevices("shared ,,3300,usb3,3-1,,Stream Deck Plus,,,,,,,\n")).toEqual([
+			{ id: "3-1", name: "Stream Deck Plus" },
 		]);
 	});
 });

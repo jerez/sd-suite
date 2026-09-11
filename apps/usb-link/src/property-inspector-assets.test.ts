@@ -18,6 +18,23 @@ describe("USB Link property inspector assets", () => {
 		expect(existsSync(path.join(pluginPath, "ui/disconnect-device.html"))).toBe(true);
 	});
 
+	it("uses a refreshable device selector backed by stable ids", () => {
+		for (const fileName of [
+			"share-device.html",
+			"unshare-device.html",
+			"connect-device.html",
+			"disconnect-device.html",
+		]) {
+			const html = readFileSync(path.join(pluginPath, "ui", fileName), "utf8");
+			expect(html).toContain("<sdpi-select");
+			expect(html).toContain('setting="deviceId"');
+			expect(html).toContain('label-setting="deviceName"');
+			expect(html).toContain('datasource="getUsbDevices"');
+			expect(html).toContain("show-refresh");
+			expect(html).not.toContain("sdpi-textfield");
+		}
+	});
+
 	it("ships all referenced action icon assets", () => {
 		expect(existsSync(path.join(pluginPath, "imgs/actions/share-device/icon.svg"))).toBe(true);
 		expect(existsSync(path.join(pluginPath, "imgs/actions/share-device/key-default.svg"))).toBe(true);
@@ -54,12 +71,12 @@ describe("USB Link property inspector assets", () => {
 		const developerGuide = readFileSync(developerGuidePath, "utf8");
 
 		expect(readme).toContain("local-only");
-		expect(readme).toContain("device name");
+		expect(readme).toContain("device selector");
 		expect(userGuide).toContain("same machine");
 		expect(userGuide).toContain("Share Device");
 		expect(userGuide).toContain("Disconnect Device");
-		expect(developerGuide).toContain("AppleScript");
+		expect(developerGuide).toContain("eveusbc");
 		expect(developerGuide).toContain("UsbService64.exe");
-		expect(developerGuide).toContain("strict name matching");
+		expect(developerGuide).toContain("stable device ID");
 	});
 });

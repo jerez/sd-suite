@@ -9,6 +9,7 @@ describe("createUsbngPlatformAdapter", () => {
 			disconnectDevice: vi.fn(),
 			listLocalDevices: vi.fn(),
 			listRemoteDevices: vi.fn(),
+			listSharedDevices: vi.fn(),
 			shareDevice: vi.fn(),
 			unshareDevice: vi.fn(),
 		};
@@ -27,6 +28,7 @@ describe("createUsbngPlatformAdapter", () => {
 			disconnectDevice: vi.fn(),
 			listLocalDevices: vi.fn(),
 			listRemoteDevices: vi.fn(),
+			listSharedDevices: vi.fn(),
 			shareDevice: vi.fn(),
 			unshareDevice: vi.fn(),
 		};

@@ -8,7 +8,7 @@
             "Name": "Share Device",
             "UUID": "dev.jerez.sds.usb-link.share-device",
             "Icon": "imgs/actions/share-device/icon",
-            "Tooltip": "Share one local USBNG device by name.",
+            "Tooltip": "Share one selected local USBNG device.",
             "PropertyInspectorPath": "ui/share-device.html",
             "Controllers": ["Keypad"],
             "States": [
@@ -22,7 +22,7 @@
             "Name": "Unshare Device",
             "UUID": "dev.jerez.sds.usb-link.unshare-device",
             "Icon": "imgs/actions/unshare-device/icon",
-            "Tooltip": "Stop sharing one local USBNG device by name.",
+            "Tooltip": "Stop sharing one selected local USBNG device.",
             "PropertyInspectorPath": "ui/unshare-device.html",
             "Controllers": ["Keypad"],
             "States": [
@@ -50,7 +50,7 @@
             "Name": "Disconnect Device",
             "UUID": "dev.jerez.sds.usb-link.disconnect-device",
             "Icon": "imgs/actions/disconnect-device/icon",
-            "Tooltip": "Disconnect one remote USBNG device by name.",
+            "Tooltip": "Disconnect one selected remote USBNG device.",
             "PropertyInspectorPath": "ui/disconnect-device.html",
             "Controllers": ["Keypad"],
             "States": [

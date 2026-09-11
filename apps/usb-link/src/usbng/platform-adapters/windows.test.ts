@@ -32,6 +32,17 @@ describe("createWindowsUsbngAdapter", () => {
 		expect(runCommand).toHaveBeenCalledWith("C:\\USBNG\\UsbService64.exe", ["show-usb-list"]);
 	});
 
+	it("enumerates only shared devices through show-shared-usb", async () => {
+		const runCommand = vi.fn().mockResolvedValue("USB Network Gate\n    Razer Tartarus V2\t- 2:1:3\n");
+		const adapter = createWindowsUsbngAdapter({
+			runCommand,
+			usbServicePaths: ["C:\\USBNG\\UsbService64.exe"],
+		});
+
+		await expect(adapter.listSharedDevices()).resolves.toEqual([{ id: "2:1:3", name: "Razer Tartarus V2" }]);
+		expect(runCommand).toHaveBeenCalledWith("C:\\USBNG\\UsbService64.exe", ["show-shared-usb"]);
+	});
+
 	it("refreshes remote names through find-remote-devices for known servers", async () => {
 		const runCommand = vi
 			.fn()

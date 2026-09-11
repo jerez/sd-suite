@@ -1,12 +1,9 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { spawn } from "node:child_process";
 
 import type { LocalUsbngDevice, RemoteUsbngDevice } from "../device-types";
 
-import { parseLocalUsbngDevices, parseNetworkUsbngDevices } from "../cli-parser";
+import { parseLocalUsbngDevices, parseNetworkUsbngDevices, parseSharedUsbngDevices } from "../cli-parser";
 import { UsbngNotAvailableError, type UsbngPlatformAdapter } from "../platform-adapter";
-
-const execFileAsync = promisify(execFile);
 
 /**
  * Default path to the USBNG CLI helper installed by the macOS client.
@@ -18,36 +15,28 @@ export const DEFAULT_EVEUSBC_PATH = "/Library/Frameworks/EveUSB.framework/Suppor
  */
 export type RunCommand = (file: string, args: string[]) => Promise<string>;
 /**
- * Executes an AppleScript snippet on the current machine.
- */
-export type RunAppleScript = (script: string) => Promise<void>;
-
-/**
  * Dependency injection points for the macOS adapter.
  */
 export type CreateMacosUsbngAdapterOptions = {
 	eveusbcPath?: string;
-	runAppleScript?: RunAppleScript;
 	runCommand?: RunCommand;
 };
 
 /**
  * Creates the macOS USBNG adapter.
  *
- * Local and remote control operations use AppleScript because the installed app
- * exposes the control surface there. Enumeration uses `eveusbc`.
+ * Enumeration and most control operations use the installed `eveusbc` CLI.
  */
 export function createMacosUsbngAdapter(options: CreateMacosUsbngAdapterOptions = {}): UsbngPlatformAdapter {
 	const eveusbcPath = options.eveusbcPath ?? DEFAULT_EVEUSBC_PATH;
-	const runCommand = options.runCommand ?? defaultRunCommand;
-	const runAppleScript = options.runAppleScript ?? defaultRunAppleScript;
+	const runCommand = options.runCommand ?? runCommandWithClosedStdin;
 
 	return {
 		async connectDevice(device: RemoteUsbngDevice): Promise<void> {
-			await runAppleScript(buildRemoteDeviceScript("connect", device.name));
+			await runCommand(eveusbcPath, ["connect", device.id]);
 		},
 		async disconnectDevice(device: RemoteUsbngDevice): Promise<void> {
-			await runAppleScript(buildRemoteDeviceScript("disconnect", device.name));
+			await runCommand(eveusbcPath, ["disconnect", device.id]);
 		},
 		async listLocalDevices(): Promise<LocalUsbngDevice[]> {
 			return parseLocalUsbngDevices(await runCommand(eveusbcPath, ["ls", "local"]));
@@ -55,55 +44,66 @@ export function createMacosUsbngAdapter(options: CreateMacosUsbngAdapterOptions 
 		async listRemoteDevices(): Promise<RemoteUsbngDevice[]> {
 			return parseNetworkUsbngDevices(await runCommand(eveusbcPath, ["ls", "net"]));
 		},
+		async listSharedDevices(): Promise<LocalUsbngDevice[]> {
+			return parseSharedUsbngDevices(await runCommand(eveusbcPath, ["ls", "shared"]));
+		},
 		async shareDevice(device: LocalUsbngDevice): Promise<void> {
-			await runAppleScript(buildLocalDeviceScript("share", device.name));
+			await runCommand("osascript", ["-e", buildShareScript(device.id)]);
 		},
 		async unshareDevice(device: LocalUsbngDevice): Promise<void> {
-			await runAppleScript(buildLocalDeviceScript("unshare", device.name));
+			await runCommand(eveusbcPath, ["unshare", device.id]);
 		},
 	};
 }
 
-async function defaultRunCommand(file: string, args: string[]): Promise<string> {
-	try {
-		const { stdout } = await execFileAsync(file, args, { encoding: "utf8" });
-		return stdout;
-	} catch (error) {
-		throw mapProcessError(error);
-	}
-}
-
-async function defaultRunAppleScript(script: string): Promise<void> {
-	try {
-		await execFileAsync("osascript", ["-e", script], { encoding: "utf8" });
-	} catch (error) {
-		throw mapProcessError(error);
-	}
-}
-
-function buildLocalDeviceScript(operation: "share" | "unshare", deviceName: string): string {
-	const escapedDeviceName = escapeAppleScriptString(deviceName);
-
+function buildShareScript(deviceId: string): string {
 	return [
 		'tell application "USB Network Gate"',
-		`${operation} (first device whose name is "${escapedDeviceName}")`,
+		`share (first device whose id is ${toLocationId(deviceId)})`,
 		"end tell",
+		"delay 3",
 	].join("\n");
 }
 
-function buildRemoteDeviceScript(operation: "connect" | "disconnect", deviceName: string): string {
-	const escapedDeviceName = escapeAppleScriptString(deviceName);
-	const command = operation === "connect" ? "connect to" : "disconnect from";
+function toLocationId(deviceId: string): number {
+	const [busText, pathText, ...extra] = deviceId.split("-");
+	const bus = Number(busText);
+	const ports = pathText?.split(".").map(Number) ?? [];
 
-	return [
-		'tell application "USB Network Gate"',
-		`${command} (first remote device whose name is "${escapedDeviceName}")`,
-		"end tell",
-	].join("\n");
+	if (
+		extra.length > 0 ||
+		!Number.isInteger(bus) ||
+		bus < 0 ||
+		bus > 255 ||
+		ports.length === 0 ||
+		ports.length > 6 ||
+		ports.some((port) => !Number.isInteger(port) || port < 0 || port > 15)
+	) {
+		throw new Error(`USB Network Gate returned an invalid local device ID: "${deviceId}".`);
+	}
+
+	return bus * 0x1000000 + ports.reduce((location, port, index) => location + port * 16 ** (5 - index), 0);
 }
 
-function escapeAppleScriptString(value: string): string {
-	return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+export function runCommandWithClosedStdin(file: string, args: string[]): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const child = spawn(file, args, { stdio: ["ignore", "pipe", "pipe"] });
+		let stdout = "";
+		let stderr = "";
+
+		child.stdout.setEncoding("utf8");
+		child.stderr.setEncoding("utf8");
+		child.stdout.on("data", (chunk: string) => (stdout += chunk));
+		child.stderr.on("data", (chunk: string) => (stderr += chunk));
+		child.once("error", (error) => reject(mapProcessError(error)));
+		child.once("close", (code) => {
+			if (code === 0) {
+				resolve(stdout);
+			} else {
+				reject(new Error(stderr.trim() || `eveusbc exited with code ${code}.`));
+			}
+		});
+	});
 }
 
 function mapProcessError(error: unknown): Error {

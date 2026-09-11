@@ -8,19 +8,18 @@ USB Network Gate installation on that machine.
 - Stream Deck 7.1 or newer
 - USB Network Gate installed locally
 - Target devices already visible to the local USB Network Gate instance
-- One visible device name per action target. USB Link does not guess between
-  duplicates.
 
 ## Configure a USB Link Key
 
 1. Drag one of the four USB Link actions to a Stream Deck key.
 2. Open the property inspector for that action.
-3. Enter the device name exactly as it appears in the local USB Network Gate
-   app or client.
+3. Select the device from the property inspector. Use the refresh button if the
+   USB Network Gate device list changed while the inspector was open.
 4. Press the key to test the action.
 
-USB Link only stores the device name in Stream Deck settings. It does not store
-hostnames, ports, or credentials.
+USB Link stores the selected USB Network Gate device ID and its visible name in
+Stream Deck settings. It does not store credentials or expose host and port
+fields.
 
 ## Actions
 
@@ -31,15 +30,17 @@ hostnames, ports, or credentials.
 | Connect Device    | Remote devices visible to the local machine and not already connected | Connects the matched remote device locally                           |
 | Disconnect Device | Remote devices visible to the local machine and already connected     | Disconnects the matched remote device locally                        |
 
-## How Device Matching Works
+## How Device Selection Works
 
-USB Link resolves a device name in this order:
+Newly configured keys execute against the selected device's stable ID, so two
+devices with the same visible name remain distinct. Existing keys configured by
+name continue to work with the previous matching rules:
 
 1. Exact match after trimming surrounding whitespace.
 2. Case-insensitive exact match after trimming surrounding whitespace.
 
-If no device matches, the action fails. If more than one device matches, the
-action also fails. USB Link never guesses between duplicate names.
+If no legacy name matches, the action fails. If more than one device matches,
+the action also fails. Re-select the device to save its stable ID.
 
 ## Key Feedback
 
@@ -54,8 +55,7 @@ window.
 
 ## Platform Notes
 
-- macOS uses local CLI enumeration plus AppleScript execution against the local
-  USB Network Gate app.
+- macOS uses the local `eveusbc` CLI and USB Network Gate app automation.
 - Windows uses the installed USB Network Gate client CLI.
 - On Windows, remote connect and disconnect act on remote devices already known
   to the local USB Network Gate client.
@@ -67,10 +67,11 @@ window.
 Check that USB Network Gate is installed locally on the same machine as Stream
 Deck.
 
-### No USB device named "..."
+### No USB device was found
 
-Check that the device is visible in the local USB Network Gate app or client
-and that the configured device name matches the visible name.
+Refresh the selector and check that the device is visible in the local USB
+Network Gate app or client. Re-select it if the saved USB port or remote
+endpoint changed.
 
 ### Multiple USB devices named "..."
 

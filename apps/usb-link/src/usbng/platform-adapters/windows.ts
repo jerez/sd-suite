@@ -77,6 +77,10 @@ export function createWindowsUsbngAdapter(options: CreateWindowsUsbngAdapterOpti
 				};
 			});
 		},
+		async listSharedDevices(): Promise<LocalUsbngDevice[]> {
+			const output = await runUsbServiceCommand(runCommand, usbServicePaths, ["show-shared-usb"]);
+			return parseWindowsLocalDevices(output);
+		},
 		async shareDevice(device: LocalUsbngDevice): Promise<void> {
 			await runUsbServiceCommand(runCommand, usbServicePaths, ["share-usb-port", device.id]);
 		},

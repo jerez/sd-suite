@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { runDeviceAction } from "./device-action-runner";
+import { getDeviceOptions, runDeviceAction } from "./device-action-runner";
 import type { UsbngPlatformAdapter } from "../usbng/platform-adapter";
 
 function createActionHandle() {
@@ -17,6 +17,7 @@ function createAdapterStub(): UsbngPlatformAdapter {
 		disconnectDevice: vi.fn(async () => undefined),
 		listLocalDevices: vi.fn(async () => []),
 		listRemoteDevices: vi.fn(async () => []),
+		listSharedDevices: vi.fn(async () => []),
 		shareDevice: vi.fn(async () => undefined),
 		unshareDevice: vi.fn(async () => undefined),
 	};
@@ -132,5 +133,36 @@ describe("runDeviceAction", () => {
 		await vi.runAllTimersAsync();
 
 		expect(action.setImage).toHaveBeenNthCalledWith(3, undefined);
+	});
+});
+
+describe("getDeviceOptions", () => {
+	it("returns sorted stable-id options for the requested operation", async () => {
+		const adapter = createAdapterStub();
+		vi.mocked(adapter.listLocalDevices).mockResolvedValue([
+			{ id: "3-1", name: "Stream Deck Plus" },
+			{ id: "1-1", name: "Brio 101" },
+		]);
+
+		await expect(getDeviceOptions("share", () => adapter)).resolves.toEqual({
+			event: "getUsbDevices",
+			items: [
+				{ label: "Brio 101", value: "1-1" },
+				{ label: "Stream Deck Plus", value: "3-1" },
+			],
+		});
+	});
+
+	it("filters remote options by connect state", async () => {
+		const adapter = createAdapterStub();
+		vi.mocked(adapter.listRemoteDevices).mockResolvedValue([
+			{ id: "host:3300", name: "Brio 101", state: "remote" },
+			{ id: "host:3301", name: "Stream Deck Plus", state: "connected" },
+		]);
+
+		await expect(getDeviceOptions("disconnect", () => adapter)).resolves.toEqual({
+			event: "getUsbDevices",
+			items: [{ label: "Stream Deck Plus", value: "host:3301" }],
+		});
 	});
 });

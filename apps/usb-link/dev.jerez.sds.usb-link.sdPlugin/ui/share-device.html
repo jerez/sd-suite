@@ -3,17 +3,17 @@
 	<head>
 		<meta charset="utf-8" />
 		<script src="./sdpi-components.js"></script>
-		<script type="module" src="./share-device.js"></script>
 	</head>
-	<body hidden>
-		<sdpi-item label="Device Name">
-			<sdpi-textfield id="device-name" setting="deviceName" placeholder="Stream Deck Plus"></sdpi-textfield>
-		</sdpi-item>
-		<sdpi-item label="Usage">
-			<sdpi-textfield id="device-helper" disabled></sdpi-textfield>
-		</sdpi-item>
-		<sdpi-item label="Validation">
-			<sdpi-textfield id="validation-message" disabled></sdpi-textfield>
+	<body>
+		<sdpi-item label="Device">
+			<sdpi-select
+				setting="deviceId"
+				label-setting="deviceName"
+				datasource="getUsbDevices"
+				loading="Loading local devices..."
+				placeholder="Choose a device"
+				show-refresh
+			></sdpi-select>
 		</sdpi-item>
 	</body>
 </html>
