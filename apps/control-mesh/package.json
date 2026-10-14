@@ -18,7 +18,7 @@
     },
     "dependencies": {
         "@elgato/streamdeck": "2.1.0",
-        "@modelcontextprotocol/sdk": "1.30.0",
+        "@modelcontextprotocol/sdk": "1.31.0",
         "bonjour-service": "^1.4.3"
     },
     "devDependencies": {
